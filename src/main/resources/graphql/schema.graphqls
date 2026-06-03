@@ -1,0 +1,31 @@
+type Query {
+  discoverMedia(title: String, genreId: ID, year: Int, type: String, minRating: Float, sortBy: String, sortDir: String): [GraphqlMediaItem!]!
+  topReviewed(limit: Int = 10): [GraphqlMediaItem!]!
+  trending: [GraphqlTrendingMedia!]!
+  statsByGenre: [GenreMediaCount!]!
+}
+
+type GraphqlMediaItem {
+  id: ID!
+  title: String!
+  description: String
+  releaseDate: String
+  posterUrl: String
+  genreIds: [ID!]!
+  reviewIds: [ID!]!
+  watchListIds: [ID!]!
+}
+
+type GraphqlTrendingMedia {
+  externalId: ID!
+  localMovieId: ID
+  title: String!
+  overview: String
+  posterUrl: String
+  savedLocally: Boolean!
+}
+
+type GenreMediaCount {
+  genreName: String!
+  mediaCount: Int!
+}

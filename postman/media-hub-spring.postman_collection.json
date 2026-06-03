@@ -1,0 +1,404 @@
+{
+  "info": {
+    "_postman_id": "0e4a17f2-df61-4f8e-8ad7-2f9de7ac8f77",
+    "name": "Media Hub Spring API",
+    "description": "Ready-to-use collection for grading/demo. Configure variables, run Auth > Login first to populate jwtToken, then test protected endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "jwtToken", "value": "" },
+    { "key": "userId", "value": "1" },
+    { "key": "roleId", "value": "1" },
+    { "key": "genreId", "value": "1" },
+    { "key": "movieId", "value": "1" },
+    { "key": "tvShowId", "value": "1" },
+    { "key": "mediaId", "value": "1" },
+    { "key": "reviewId", "value": "1" },
+    { "key": "watchlistId", "value": "1" },
+    { "key": "tmdbId", "value": "550" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Ping",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/ping"
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password12\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"profileImage\": \"https://cdn.example.com/profiles/john.png\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.token) {",
+                  "  pm.collectionVariables.set('jwtToken', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password12\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Walker\",\n  \"email\": \"alice.walker@example.com\",\n  \"password\": \"password12\",\n  \"profileImage\": \"https://cdn.example.com/profiles/alice.png\"\n}"
+            },
+            "url": "{{baseUrl}}/users/add"
+          }
+        },
+        { "name": "Get All Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/users/all" } },
+        { "name": "Get User By ID", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/users/{{userId}}" } },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alice Updated\",\n  \"lastName\": \"Walker\",\n  \"email\": \"alice.walker@example.com\",\n  \"password\": \"password12\",\n  \"profileImage\": \"https://cdn.example.com/profiles/alice-updated.png\"\n}"
+            },
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Assign Roles To User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleIds\": [{{roleId}}]\n}"
+            },
+            "url": "{{baseUrl}}/users/{{userId}}/roles"
+          }
+        },
+        { "name": "Delete User", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/users/{{userId}}" } }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"EDITOR\"\n}" },
+            "url": "{{baseUrl}}/roles"
+          }
+        },
+        { "name": "Get All Roles", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/roles/all" } },
+        { "name": "Get Role By ID", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/roles/{{roleId}}" } },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ROLE_SAMPLE\"\n}" },
+            "url": "{{baseUrl}}/roles/{{roleId}}"
+          }
+        },
+        { "name": "Delete Role", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/roles/{{roleId}}" } }
+      ]
+    },
+    {
+      "name": "Genres",
+      "item": [
+        {
+          "name": "Create Genre",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sci-Fi\"\n}" },
+            "url": "{{baseUrl}}/genres"
+          }
+        },
+        { "name": "Get All Genres", "request": { "method": "GET", "url": "{{baseUrl}}/genres" } },
+        { "name": "Get Genre By ID", "request": { "method": "GET", "url": "{{baseUrl}}/genres/{{genreId}}" } },
+        {
+          "name": "Update Genre",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Science Fiction\"\n}" },
+            "url": "{{baseUrl}}/genres/{{genreId}}"
+          }
+        },
+        { "name": "Delete Genre", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/genres/{{genreId}}" } }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Create Movie",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Interstellar\",\n  \"description\": \"Space exploration\",\n  \"releaseDate\": \"2014-11-07\",\n  \"posterUrl\": \"https://image.tmdb.org/t/p/w500/sample.jpg\",\n  \"genreIds\": [{{genreId}}],\n  \"duration\": 169,\n  \"director\": \"Christopher Nolan\",\n  \"budget\": 165000000\n}"
+            },
+            "url": "{{baseUrl}}/movies"
+          }
+        },
+        { "name": "Get All Movies", "request": { "method": "GET", "url": "{{baseUrl}}/movies/all" } },
+        { "name": "Get Movie By ID", "request": { "method": "GET", "url": "{{baseUrl}}/movies/{{movieId}}" } },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Interstellar Updated\",\n  \"description\": \"Space exploration movie\",\n  \"releaseDate\": \"2014-11-07\",\n  \"posterUrl\": \"https://image.tmdb.org/t/p/w500/sample2.jpg\",\n  \"genreIds\": [{{genreId}}],\n  \"duration\": 169,\n  \"director\": \"Christopher Nolan\",\n  \"budget\": 165000000\n}"
+            },
+            "url": "{{baseUrl}}/movies/{{movieId}}"
+          }
+        },
+        { "name": "Delete Movie", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/movies/{{movieId}}" } }
+      ]
+    },
+    {
+      "name": "TV Shows",
+      "item": [
+        {
+          "name": "Create TV Show",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Dark\",\n  \"description\": \"Mystery sci-fi\",\n  \"releaseDate\": \"2017-12-01\",\n  \"posterUrl\": \"https://image.tmdb.org/t/p/w500/dark.jpg\",\n  \"genreIds\": [{{genreId}}],\n  \"seasons\": 3,\n  \"episodes\": 26,\n  \"network\": \"Netflix\"\n}"
+            },
+            "url": "{{baseUrl}}/tvshows"
+          }
+        },
+        { "name": "Get All TV Shows", "request": { "method": "GET", "url": "{{baseUrl}}/tvshows/all" } },
+        { "name": "Get TV Show By ID", "request": { "method": "GET", "url": "{{baseUrl}}/tvshows/{{tvShowId}}" } },
+        {
+          "name": "Update TV Show",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Dark Updated\",\n  \"description\": \"Mystery sci-fi\",\n  \"releaseDate\": \"2017-12-01\",\n  \"posterUrl\": \"https://image.tmdb.org/t/p/w500/dark2.jpg\",\n  \"genreIds\": [{{genreId}}],\n  \"seasons\": 3,\n  \"episodes\": 26,\n  \"network\": \"Netflix\"\n}"
+            },
+            "url": "{{baseUrl}}/tvshows/{{tvShowId}}"
+          }
+        },
+        { "name": "Delete TV Show", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/tvshows/{{tvShowId}}" } }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": {{userId}},\n  \"text\": \"Amazing movie\",\n  \"mediaItemId\": {{mediaId}},\n  \"rating\": 9\n}"
+            },
+            "url": "{{baseUrl}}/reviews"
+          }
+        },
+        { "name": "Get All Reviews", "request": { "method": "GET", "url": "{{baseUrl}}/reviews/all" } },
+        { "name": "Get Review By ID", "request": { "method": "GET", "url": "{{baseUrl}}/reviews/{{reviewId}}" } },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"text\": \"Still great after rewatch\",\n  \"rating\": 8\n}" },
+            "url": "{{baseUrl}}/reviews/{{reviewId}}"
+          }
+        },
+        { "name": "Delete Review", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/reviews/{{reviewId}}" } }
+      ]
+    },
+    {
+      "name": "Watchlist",
+      "item": [
+        {
+          "name": "Add To Watchlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwtToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": {{userId}},\n  \"mediaItemId\": {{mediaId}}\n}" },
+            "url": "{{baseUrl}}/watchlist"
+          }
+        },
+        { "name": "Get All Watchlist Items", "request": { "method": "GET", "url": "{{baseUrl}}/watchlist/all" } },
+        { "name": "Get Watchlist By ID", "request": { "method": "GET", "url": "{{baseUrl}}/watchlist/{{watchlistId}}" } },
+        { "name": "Get Watchlist By User", "request": { "method": "GET", "url": "{{baseUrl}}/watchlist/user/{{userId}}" } },
+        { "name": "Get Watchlist By Media", "request": { "method": "GET", "url": "{{baseUrl}}/watchlist/media/{{mediaId}}" } },
+        { "name": "Watchlist Exists", "request": { "method": "GET", "url": "{{baseUrl}}/watchlist/exists?userId={{userId}}&mediaItemId={{mediaId}}" } },
+        { "name": "Delete Watchlist Item", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }], "url": "{{baseUrl}}/watchlist/{{watchlistId}}" } }
+      ]
+    },
+    {
+      "name": "Media Queries",
+      "item": [
+        { "name": "Search By Title", "request": { "method": "GET", "url": "{{baseUrl}}/media/search?title=dark" } },
+        { "name": "By Genre", "request": { "method": "GET", "url": "{{baseUrl}}/media/by-genre/{{genreId}}" } },
+        { "name": "By Year", "request": { "method": "GET", "url": "{{baseUrl}}/media/by-year/2014" } },
+        { "name": "Top Reviewed", "request": { "method": "GET", "url": "{{baseUrl}}/media/top-reviewed?limit=10" } },
+        { "name": "Advanced Search", "request": { "method": "GET", "url": "{{baseUrl}}/media/advanced-search?title=inter&genreId={{genreId}}&year=2014" } },
+        { "name": "By Type", "request": { "method": "GET", "url": "{{baseUrl}}/media/by-type/movie" } },
+        { "name": "Best Rated Above", "request": { "method": "GET", "url": "{{baseUrl}}/media/best-rated-above?minRating=8.0" } },
+        { "name": "Discover", "request": { "method": "GET", "url": "{{baseUrl}}/media/discover?title=inter&genreId={{genreId}}&year=2014&type=movie&minRating=7.5&sortBy=releaseDate&sortDir=desc" } },
+        { "name": "Stats By Genre", "request": { "method": "GET", "url": "{{baseUrl}}/media/stats/by-genre" } },
+        { "name": "Average Rating", "request": { "method": "GET", "url": "{{baseUrl}}/media/{{mediaId}}/average-rating" } }
+      ]
+    },
+    {
+      "name": "External Media",
+      "item": [
+        { "name": "External Movie Details", "request": { "method": "GET", "url": "{{baseUrl}}/external/movie/{{tmdbId}}" } },
+        { "name": "External Search", "request": { "method": "GET", "url": "{{baseUrl}}/external/search?query=inception" } },
+        { "name": "External Trending", "request": { "method": "GET", "url": "{{baseUrl}}/external/trending" } },
+        {
+          "name": "Save External Movie",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }],
+            "url": "{{baseUrl}}/external/movie/{{tmdbId}}/save"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "Discover + Stats",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { discoverMedia(title: \\\"inter\\\", genreId: \\\"1\\\", year: 2014, type: \\\"movie\\\", minRating: 7.5, sortBy: \\\"releaseDate\\\", sortDir: \\\"desc\\\") { id title releaseDate } statsByGenre { genreName mediaCount } }\"\n}"
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Top Reviewed + Trending",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { topReviewed(limit: 5) { id title } trending { externalId title savedLocally } }\"\n}"
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        }
+      ]
+    }
+  ]
+}
