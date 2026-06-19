@@ -4,7 +4,7 @@ import type { ApiError } from "../types";
 
 const BASE_URL =
   (import.meta.env.VITE_MEDIA_HUB_BACKEND as string | undefined) ??
-  "http://localhost:8080";
+  "";
 
 const TOKEN_KEY = "mediahub.jwt";
 
@@ -40,7 +40,12 @@ function buildUrl(
   path: string,
   params?: RequestOptions["params"],
 ): string {
-  const url = new URL(path.startsWith("http") ? path : `${BASE_URL}${path}`);
+  const target = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  const base =
+    typeof window !== "undefined" && window.location?.origin
+      ? window.location.origin
+      : "http://localhost";
+  const url = new URL(target, base);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null && value !== "") {
