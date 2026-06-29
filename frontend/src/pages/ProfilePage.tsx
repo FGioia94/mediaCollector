@@ -68,10 +68,11 @@ export function ProfilePage() {
     }
 
     try {
-      const updated = await usersApi.updateMyProfileImage({
+      await usersApi.updateMyProfileImage({
         profileImage: trimmed || null,
       });
-      setProfileImageDraft(updated.profileImage ?? "");
+      const refreshed = await usersApi.getMe();
+      setProfileImageDraft(refreshed.profileImage ?? "");
       setImageSaved(true);
       setTimeout(() => setImageSaved(false), 1500);
     } catch (err) {
