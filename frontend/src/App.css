@@ -800,6 +800,77 @@ fieldset {
   color: #6c5b46;
 }
 
+.external-media-card {
+  overflow: visible;
+}
+
+.external-hover-link-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.external-hover-card {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 90;
+  width: 280px;
+  border-radius: 12px;
+  border: 1px solid #d8c2a4;
+  background: #fffdf8;
+  box-shadow: 0 18px 30px rgba(59, 37, 18, 0.24);
+  overflow: hidden;
+  animation: preview-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+.external-hover-poster {
+  width: 100%;
+  height: 145px;
+  object-fit: cover;
+  display: block;
+  background: #eee4d5;
+}
+
+.external-hover-poster.placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.external-hover-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+  padding: 0.62rem 0.68rem 0.72rem;
+}
+
+.external-hover-meta strong {
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.external-hover-meta small {
+  color: #6f6250;
+  font-size: 0.74rem;
+}
+
+.external-hover-overview {
+  color: #5f5446;
+  font-size: 0.78rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.external-hover-trailer {
+  align-self: flex-start;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
 .data-table {
   width: 100%;
   border-collapse: separate;
@@ -1402,6 +1473,10 @@ fieldset {
 
 @media (hover: none) {
   .media-hover-card {
+    display: none;
+  }
+
+  .external-hover-card {
     display: none;
   }
 }

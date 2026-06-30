@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
 import { useAuth } from "../auth/AuthContext";
+import { ExternalHoverLink } from "../components/ExternalHoverLink";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -51,7 +52,7 @@ export function TrendingPage() {
       {items && items.length > 0 && (
         <div className="media-grid">
           {items.map((item) => (
-            <article key={item.externalId} className="media-card">
+            <article key={item.externalId} className="media-card external-media-card">
               {item.posterUrl ? (
                 <img
                   src={item.posterUrl}
@@ -64,7 +65,13 @@ export function TrendingPage() {
               <div className="media-card-body">
                 <h3>{item.title}</h3>
                 <p className="muted">{item.overview?.slice(0, 120)}…</p>
-                <Link to={`/external/movie/${item.externalId}`}>See more</Link>
+                <ExternalHoverLink
+                  externalId={item.externalId}
+                  titleHint={item.title}
+                  posterHint={item.posterUrl}
+                >
+                  See more
+                </ExternalHoverLink>
                 {item.savedLocally && item.localMovieId !== null ? (
                   <Link to={`/media/${item.localMovieId}`}>View local</Link>
                 ) : isAuthenticated ? (

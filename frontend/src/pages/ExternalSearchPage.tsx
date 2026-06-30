@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
 import { useAuth } from "../auth/AuthContext";
+import { ExternalHoverLink } from "../components/ExternalHoverLink";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -205,7 +205,7 @@ export function ExternalSearchPage() {
       {results && results.results.length > 0 && (
         <div className="media-grid">
           {results.results.map((item) => (
-            <article key={item.id} className="media-card">
+            <article key={item.id} className="media-card external-media-card">
               {(item.posterPath ?? item.poster_path) ? (
                 <img
                   src={`https://image.tmdb.org/t/p/w300${item.posterPath ?? item.poster_path}`}
@@ -219,7 +219,18 @@ export function ExternalSearchPage() {
                 <h3>{item.title}</h3>
                 <p className="muted">{item.releaseDate ?? item.release_date}</p>
                 <p className="muted">{item.overview?.slice(0, 120)}…</p>
-                <Link to={`/external/movie/${item.id}`}>See more</Link>
+                <ExternalHoverLink
+                  externalId={item.id}
+                  titleHint={item.title}
+                  releaseHint={item.releaseDate ?? item.release_date}
+                  posterHint={
+                    (item.posterPath ?? item.poster_path)
+                      ? `https://image.tmdb.org/t/p/w300${item.posterPath ?? item.poster_path}`
+                      : undefined
+                  }
+                >
+                  See more
+                </ExternalHoverLink>
                 {isAuthenticated && (
                   <button type="button" onClick={() => handleSave(item.id)}>
                     Save to library
