@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import * as external from "../api/external";
-import type { EnrichedMediaDetails } from "../types";
+import type { EnrichedMediaDetails, ExternalTrailerResponse } from "../types";
 
 interface ExternalHoverCardWrapProps {
   externalId: number;
@@ -22,6 +22,7 @@ interface ExternalHoverPreview {
 }
 
 const previewCache = new Map<number, ExternalHoverPreview | null>();
+const trailerCache = new Map<number, ExternalTrailerResponse | null>();
 
 function normalizePosterUrl(candidate?: string | null): string | undefined {
   if (!candidate) return undefined;
@@ -83,10 +84,16 @@ export function ExternalHoverCardWrap({
 }: ExternalHoverCardWrapProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
   const [preview, setPreview] = useState<ExternalHoverPreview | null>(() => {
     return previewCache.get(externalId) ?? null;
   });
+  const [trailer, setTrailer] = useState<ExternalTrailerResponse | null>(() => {
+    return trailerCache.get(externalId) ?? null;
+  });
+  const [muted, setMuted] = useState(true);
   const requestRef = useRef(0);
+  const trailerRequestRef = useRef(0);
 
   useEffect(() => {
     if (!open || preview) return;
@@ -112,7 +119,41 @@ export function ExternalHoverCardWrap({
     };
   }, [externalId, open, preview, posterHint, releaseHint, titleHint]);
 
-  const trailerQuery = encodeURIComponent(`${preview?.title ?? titleHint ?? "movie"} trailer`);
+  useEffect(() => {
+    if (!open || trailer) return;
+
+    let cancelled = false;
+    const requestId = ++trailerRequestRef.current;
+
+    setLoadingTrailer(true);
+    external
+      .externalTrailer(externalId)
+      .then((data) => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          trailerCache.set(externalId, data);
+          setTrailer(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          trailerCache.set(externalId, null);
+          setTrailer(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          setLoadingTrailer(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [externalId, open, trailer]);
+
+  const trailerSrc = trailer?.embedUrl
+    ? `${trailer.embedUrl}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&rel=0&modestbranding=1&playsinline=1`
+    : null;
 
   return (
     <div
@@ -128,7 +169,7 @@ export function ExternalHoverCardWrap({
         <span className="external-hover-card" role="tooltip" aria-live="polite">
           {loading ? (
             <>
-              <span className="external-hover-poster shimmer" />
+              <span className="external-hover-video shimmer" />
               <span className="external-hover-meta">
                 <span className="skeleton-line shimmer" />
                 <span className="skeleton-line short shimmer" />
@@ -136,7 +177,16 @@ export function ExternalHoverCardWrap({
             </>
           ) : preview ? (
             <>
-              {preview.posterUrl ? (
+              {trailerSrc ? (
+                <iframe
+                  src={trailerSrc}
+                  title={`${preview.title} trailer`}
+                  className="external-hover-video"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              ) : preview.posterUrl ? (
                 <img
                   src={preview.posterUrl}
                   alt={preview.title}
@@ -153,14 +203,21 @@ export function ExternalHoverCardWrap({
                   IMDb: {preview.imdbRating || "n/a"} · Metascore: {preview.metascore || "n/a"}
                 </small>
                 <span className="external-hover-overview">{preview.overview}</span>
-                <a
-                  href={`https://www.youtube.com/results?search_query=${trailerQuery}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="external-hover-trailer"
-                >
-                  Watch trailer
-                </a>
+                <span className="external-hover-actions">
+                  {trailerSrc ? (
+                    <button
+                      type="button"
+                      className="external-hover-audio"
+                      onClick={() => setMuted((prev) => !prev)}
+                    >
+                      {muted ? "Unmute trailer" : "Mute trailer"}
+                    </button>
+                  ) : loadingTrailer ? (
+                    <small className="muted">Loading trailer...</small>
+                  ) : (
+                    <small className="muted">Trailer unavailable</small>
+                  )}
+                </span>
               </span>
             </>
           ) : (

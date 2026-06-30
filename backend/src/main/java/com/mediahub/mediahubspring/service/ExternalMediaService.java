@@ -1,9 +1,11 @@
 package com.mediahub.mediahubspring.service;
 
 import com.mediahub.mediahubspring.dto.EnrichedMediaDetails;
+import com.mediahub.mediahubspring.dto.ExternalTrailerResponse;
 import com.mediahub.mediahubspring.dto.OmdbRatingResponse;
 import com.mediahub.mediahubspring.dto.TmdbGenre;
 import com.mediahub.mediahubspring.dto.TmdbSearchResponse;
+import com.mediahub.mediahubspring.dto.TmdbVideoResult;
 import com.mediahub.mediahubspring.dto.TrendingMediaResponse;
 import com.mediahub.mediahubspring.exception.ExternalApiException;
 import com.mediahub.mediahubspring.model.Genre;
@@ -16,6 +18,7 @@ import com.mediahub.mediahubspring.service.OmdbClient;
 import com.mediahub.mediahubspring.dto.TmdbMovieDetails;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -121,6 +124,33 @@ public class ExternalMediaService {
         // Reuse the same duplicate-title guard used by local create/update flows.
         mediaTitleGuard.assertUniqueForCreate(movie.getTitle());
         return movieRepository.save(movie);
+    }
+
+    public ExternalTrailerResponse getMovieTrailer(Long tmdbId) {
+        var videos = tmdb.getMovieVideos(tmdbId);
+        if (videos == null || videos.results() == null || videos.results().isEmpty()) {
+            return null;
+        }
+
+        TmdbVideoResult selected = videos.results().stream()
+                .filter(v -> "youtube".equalsIgnoreCase(v.site()))
+                .filter(v -> {
+                    String type = v.type() == null ? "" : v.type().toLowerCase(Locale.ROOT);
+                    return "trailer".equals(type) || "teaser".equals(type);
+                })
+                .sorted((a, b) -> Boolean.compare(Boolean.TRUE.equals(b.official()), Boolean.TRUE.equals(a.official())))
+                .findFirst()
+                .orElse(null);
+
+        if (selected == null || selected.key() == null || selected.key().isBlank()) {
+            return null;
+        }
+
+        return new ExternalTrailerResponse(
+                "YouTube",
+                selected.key(),
+                "https://www.youtube.com/embed/" + selected.key()
+        );
     }
 
 

@@ -167,6 +167,12 @@ export interface TrendingMediaResponse {
   savedLocally: boolean;
 }
 
+export interface ExternalTrailerResponse {
+  provider: string;
+  key: string;
+  embedUrl: string;
+}
+
 export interface TmdbMovieSearchResult {
   id: number;
   title: string;

@@ -1,6 +1,7 @@
 package com.mediahub.mediahubspring.controller;
 
 import com.mediahub.mediahubspring.dto.EnrichedMediaDetails;
+import com.mediahub.mediahubspring.dto.ExternalTrailerResponse;
 import com.mediahub.mediahubspring.dto.MovieResponse;
 import com.mediahub.mediahubspring.dto.TmdbSearchResponse;
 import com.mediahub.mediahubspring.dto.TrendingMediaResponse;
@@ -26,6 +27,11 @@ public class ExternalMediaController {
     @GetMapping("/movie/{id}")
     public EnrichedMediaDetails getMovie(@PathVariable Long id) {
         return service.getMovieDetails(id);
+    }
+
+    @GetMapping("/movie/{id}/trailer")
+    public ExternalTrailerResponse getMovieTrailer(@PathVariable Long id) {
+        return service.getMovieTrailer(id);
     }
 
     @GetMapping("/search")

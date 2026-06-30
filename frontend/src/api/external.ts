@@ -1,6 +1,7 @@
 import { request } from "./client";
 import type {
   EnrichedMediaDetails,
+  ExternalTrailerResponse,
   MovieResponse,
   TmdbSearchResponse,
   TrendingMediaResponse,
@@ -8,6 +9,10 @@ import type {
 
 export const externalMovie = (id: number): Promise<EnrichedMediaDetails> =>
   request(`/external/movie/${id}`);
+
+export const externalTrailer = (
+  id: number,
+): Promise<ExternalTrailerResponse | null> => request(`/external/movie/${id}/trailer`);
 
 export const externalSearch = (query: string): Promise<TmdbSearchResponse> =>
   request("/external/search", { params: { query } });

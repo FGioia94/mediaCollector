@@ -829,7 +829,8 @@ fieldset {
   left: 0;
   top: calc(100% + 0.5rem);
   z-index: 300;
-  width: 280px;
+  width: 460px;
+  max-width: min(78vw, 460px);
   border-radius: 12px;
   border: 1px solid #d8c2a4;
   background: #fffdf8;
@@ -841,10 +842,18 @@ fieldset {
 
 .external-hover-poster {
   width: 100%;
-  height: 145px;
+  height: 210px;
   object-fit: cover;
   display: block;
   background: #eee4d5;
+}
+
+.external-hover-video {
+  width: 100%;
+  height: 245px;
+  border: 0;
+  display: block;
+  background: #1d1d1d;
 }
 
 .external-hover-poster.placeholder {
@@ -875,9 +884,21 @@ fieldset {
   color: #5f5446;
   font-size: 0.78rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.external-hover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 0.2rem;
+}
+
+.external-hover-audio {
+  padding: 0.34rem 0.56rem;
+  font-size: 0.76rem;
 }
 
 .external-hover-trailer {

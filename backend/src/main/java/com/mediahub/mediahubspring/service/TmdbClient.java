@@ -2,6 +2,7 @@ package com.mediahub.mediahubspring.service;
 
 import com.mediahub.mediahubspring.dto.TmdbMovieDetails;
 import com.mediahub.mediahubspring.dto.TmdbSearchResponse;
+import com.mediahub.mediahubspring.dto.TmdbVideoResponse;
 import com.mediahub.mediahubspring.exception.ExternalApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,17 @@ public class TmdbClient {
         } catch (Exception ex) {
             log.error("[TMDB] Error calling getMovieDetails(): {}", ex.getMessage());
             throw new ExternalApiException("TMDB movie details request failed");
+        }
+    }
+
+    public TmdbVideoResponse getMovieVideos(Long id) {
+        String url = "https://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + apiKey;
+
+        try {
+            return rest.getForObject(url, TmdbVideoResponse.class);
+        } catch (Exception ex) {
+            log.error("[TMDB] Error calling getMovieVideos(): {}", ex.getMessage());
+            throw new ExternalApiException("TMDB movie videos request failed");
         }
     }
 
