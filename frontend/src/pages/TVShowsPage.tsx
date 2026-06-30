@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as tvshows from "../api/tvshows";
 import { useAuth } from "../auth/AuthContext";
+import { MediaCardHoverWrap } from "../components/MediaCardHoverWrap";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -53,8 +54,38 @@ export function TVShowsPage() {
       {items && items.length === 0 && <EmptyMsg>No shows yet.</EmptyMsg>}
       {items && items.length > 0 && (
         <div className="media-grid">
-          {items.map((tv) => (
-            <article key={tv.id} className="media-card">
+          {items.map((tv) => {
+            const cardActions = (
+              <>
+                <Link to={`/media/${tv.id}`} className="button-link ghost">
+                  See details
+                </Link>
+                {isAuthenticated && (
+                  <>
+                    <Link to={`/tvshows/${tv.id}/edit`} className="button-link ghost">
+                      Edit
+                    </Link>
+                    <button type="button" onClick={() => handleDelete(tv.id)}>
+                      Delete
+                    </button>
+                  </>
+                )}
+              </>
+            );
+
+            return (
+              <MediaCardHoverWrap
+                key={tv.id}
+                mediaId={tv.id}
+                previewHint={{
+                  title: tv.title,
+                  posterUrl: tv.posterUrl,
+                  releaseDate: tv.releaseDate,
+                  kind: "TV Show",
+                }}
+                popupActions={cardActions}
+              >
+              <article className="media-card">
               {tv.posterUrl ? (
                 <img src={tv.posterUrl} alt={tv.title} className="media-card-poster" />
               ) : (
@@ -68,18 +99,12 @@ export function TVShowsPage() {
                   <span>{tv.episodes} episodes</span>
                 </div>
                 <p className="muted">{tv.releaseDate || "Release date unavailable"}</p>
-                <Link to={`/media/${tv.id}`}>See details</Link>
-                {isAuthenticated && (
-                  <div className="row-actions">
-                    <Link to={`/tvshows/${tv.id}/edit`}>Edit</Link>
-                    <button type="button" onClick={() => handleDelete(tv.id)}>
-                      Delete
-                    </button>
-                  </div>
-                )}
+                <div className="card-actions">{cardActions}</div>
               </div>
             </article>
-          ))}
+              </MediaCardHoverWrap>
+            );
+          })}
         </div>
       )}
     </section>

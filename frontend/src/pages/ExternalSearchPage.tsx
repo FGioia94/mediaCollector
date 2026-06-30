@@ -205,18 +205,33 @@ export function ExternalSearchPage() {
       )}
       {results && results.results.length > 0 && (
         <div className="media-grid">
-          {results.results.map((item) => (
-            <ExternalHoverCardWrap
-              key={item.id}
-              externalId={item.id}
-              titleHint={item.title}
-              releaseHint={item.releaseDate ?? item.release_date}
-              posterHint={
-                (item.posterPath ?? item.poster_path)
-                  ? `https://image.tmdb.org/t/p/w300${item.posterPath ?? item.poster_path}`
-                  : undefined
-              }
-            >
+          {results.results.map((item) => {
+            const cardActions = (
+              <>
+                <Link to={`/external/movie/${item.id}`} className="button-link ghost">
+                  See more
+                </Link>
+                {isAuthenticated ? (
+                  <button type="button" onClick={() => handleSave(item.id)}>
+                    Import
+                  </button>
+                ) : null}
+              </>
+            );
+
+            return (
+              <ExternalHoverCardWrap
+                key={item.id}
+                externalId={item.id}
+                titleHint={item.title}
+                releaseHint={item.releaseDate ?? item.release_date}
+                posterHint={
+                  (item.posterPath ?? item.poster_path)
+                    ? `https://image.tmdb.org/t/p/w300${item.posterPath ?? item.poster_path}`
+                    : undefined
+                }
+                popupActions={cardActions}
+              >
               <article className="media-card external-media-card">
                 {(item.posterPath ?? item.poster_path) ? (
                   <img
@@ -231,16 +246,12 @@ export function ExternalSearchPage() {
                   <h3>{item.title}</h3>
                   <p className="muted">{item.releaseDate ?? item.release_date}</p>
                   <p className="muted">{item.overview?.slice(0, 120)}…</p>
-                  <Link to={`/external/movie/${item.id}`}>See more</Link>
-                  {isAuthenticated && (
-                    <button type="button" onClick={() => handleSave(item.id)}>
-                      Save to library
-                    </button>
-                  )}
+                  <div className="card-actions">{cardActions}</div>
                 </div>
               </article>
-            </ExternalHoverCardWrap>
-          ))}
+              </ExternalHoverCardWrap>
+            );
+          })}
         </div>
       )}
     </section>

@@ -51,13 +51,36 @@ export function TrendingPage() {
       {items && items.length === 0 && <EmptyMsg>No trending data.</EmptyMsg>}
       {items && items.length > 0 && (
         <div className="media-grid">
-          {items.map((item) => (
-            <ExternalHoverCardWrap
-              key={item.externalId}
-              externalId={item.externalId}
-              titleHint={item.title}
-              posterHint={item.posterUrl}
-            >
+          {items.map((item) => {
+            const cardActions = (
+              <>
+                <Link to={`/external/movie/${item.externalId}`} className="button-link ghost">
+                  See more
+                </Link>
+                {item.savedLocally && item.localMovieId !== null ? (
+                  <Link to={`/media/${item.localMovieId}`} className="button-link ghost">
+                    View local
+                  </Link>
+                ) : isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={() => handleSave(item.externalId)}
+                    disabled={savingId === item.externalId}
+                  >
+                    {savingId === item.externalId ? "Saving..." : "Import"}
+                  </button>
+                ) : null}
+              </>
+            );
+
+            return (
+              <ExternalHoverCardWrap
+                key={item.externalId}
+                externalId={item.externalId}
+                titleHint={item.title}
+                posterHint={item.posterUrl}
+                popupActions={cardActions}
+              >
               <article className="media-card external-media-card">
                 {item.posterUrl ? (
                   <img
@@ -71,26 +94,12 @@ export function TrendingPage() {
                 <div className="media-card-body">
                   <h3>{item.title}</h3>
                   <p className="muted">{item.overview?.slice(0, 120)}…</p>
-                  <Link to={`/external/movie/${item.externalId}`}>See more</Link>
-                  {item.savedLocally && item.localMovieId !== null ? (
-                    <Link to={`/media/${item.localMovieId}`}>View local</Link>
-                  ) : isAuthenticated ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSave(item.externalId)}
-                      disabled={savingId === item.externalId}
-                    >
-                      {savingId === item.externalId
-                        ? "Saving…"
-                        : "Save to library"}
-                    </button>
-                  ) : (
-                    <small className="muted">Login to import.</small>
-                  )}
+                  <div className="card-actions">{cardActions}</div>
                 </div>
               </article>
-            </ExternalHoverCardWrap>
-          ))}
+              </ExternalHoverCardWrap>
+            );
+          })}
         </div>
       )}
     </section>

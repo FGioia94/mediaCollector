@@ -10,6 +10,7 @@ interface ExternalHoverCardWrapProps {
   posterHint?: string;
   releaseHint?: string;
   children: ReactNode;
+  popupActions?: ReactNode;
 }
 
 interface ExternalHoverPreview {
@@ -81,6 +82,7 @@ export function ExternalHoverCardWrap({
   posterHint,
   releaseHint,
   children,
+  popupActions,
 }: ExternalHoverCardWrapProps) {
   const [open, setOpen] = useState(false);
   const [desktopHoverEnabled, setDesktopHoverEnabled] = useState(false);
@@ -168,12 +170,31 @@ export function ExternalHoverCardWrap({
     ? `${trailer.embedUrl}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1`
     : null;
 
+  const isInteractiveTarget = (target: EventTarget | null): boolean => {
+    if (!(target instanceof HTMLElement)) return false;
+    return !!target.closest("button, a, .card-actions");
+  };
+
   return (
     <div
       className="external-hover-trigger-wrap"
-      onMouseEnter={() => desktopHoverEnabled && setOpen(true)}
+      onMouseEnter={(event) => {
+        if (!desktopHoverEnabled || isInteractiveTarget(event.target)) return;
+        setOpen(true);
+      }}
+      onMouseMove={(event) => {
+        if (!desktopHoverEnabled) return;
+        if (isInteractiveTarget(event.target)) {
+          if (open) setOpen(false);
+          return;
+        }
+        if (!open) setOpen(true);
+      }}
       onMouseLeave={() => setOpen(false)}
-      onFocus={() => desktopHoverEnabled && setOpen(true)}
+      onFocus={(event) => {
+        if (!desktopHoverEnabled || isInteractiveTarget(event.target)) return;
+        setOpen(true);
+      }}
       onBlur={() => setOpen(false)}
     >
       {children}
@@ -219,10 +240,11 @@ export function ExternalHoverCardWrap({
                 <span className="external-hover-actions">
                   {loadingTrailer ? (
                     <small className="muted">Loading trailer...</small>
-                  ) : (
+                  ) : !trailerSrc ? (
                     <small className="muted">Trailer unavailable</small>
-                  )}
+                  ) : null}
                 </span>
+                {popupActions && <span className="card-actions external-popup-actions">{popupActions}</span>}
               </span>
             </>
           ) : (

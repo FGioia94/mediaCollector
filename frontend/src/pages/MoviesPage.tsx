@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
+import { MediaCardHoverWrap } from "../components/MediaCardHoverWrap";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -53,8 +54,38 @@ export function MoviesPage() {
       {items && items.length === 0 && <EmptyMsg>No movies yet.</EmptyMsg>}
       {items && items.length > 0 && (
         <div className="media-grid">
-          {items.map((movie) => (
-            <article key={movie.id} className="media-card">
+          {items.map((movie) => {
+            const cardActions = (
+              <>
+                <Link to={`/media/${movie.id}`} className="button-link ghost">
+                  See details
+                </Link>
+                {isAuthenticated && (
+                  <>
+                    <Link to={`/movies/${movie.id}/edit`} className="button-link ghost">
+                      Edit
+                    </Link>
+                    <button type="button" onClick={() => handleDelete(movie.id)}>
+                      Delete
+                    </button>
+                  </>
+                )}
+              </>
+            );
+
+            return (
+              <MediaCardHoverWrap
+                key={movie.id}
+                mediaId={movie.id}
+                previewHint={{
+                  title: movie.title,
+                  posterUrl: movie.posterUrl,
+                  releaseDate: movie.releaseDate,
+                  kind: "Movie",
+                }}
+                popupActions={cardActions}
+              >
+              <article className="media-card">
               {movie.posterUrl ? (
                 <img src={movie.posterUrl} alt={movie.title} className="media-card-poster" />
               ) : (
@@ -67,18 +98,12 @@ export function MoviesPage() {
                   <span>{movie.duration} min</span>
                 </div>
                 <p className="muted">{movie.director ? `Director: ${movie.director}` : "Director unavailable"}</p>
-                <Link to={`/media/${movie.id}`}>See details</Link>
-                {isAuthenticated && (
-                  <div className="row-actions">
-                    <Link to={`/movies/${movie.id}/edit`}>Edit</Link>
-                    <button type="button" onClick={() => handleDelete(movie.id)}>
-                      Delete
-                    </button>
-                  </div>
-                )}
+                <div className="card-actions">{cardActions}</div>
               </div>
             </article>
-          ))}
+              </MediaCardHoverWrap>
+            );
+          })}
         </div>
       )}
     </section>
