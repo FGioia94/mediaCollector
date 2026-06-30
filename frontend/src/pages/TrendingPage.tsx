@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
 import { useAuth } from "../auth/AuthContext";
-import { ExternalHoverLink } from "../components/ExternalHoverLink";
+import { ExternalHoverCardWrap } from "../components/ExternalHoverCardWrap";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -52,43 +52,44 @@ export function TrendingPage() {
       {items && items.length > 0 && (
         <div className="media-grid">
           {items.map((item) => (
-            <article key={item.externalId} className="media-card external-media-card">
-              {item.posterUrl ? (
-                <img
-                  src={item.posterUrl}
-                  alt={item.title}
-                  className="media-card-poster"
-                />
-              ) : (
-                <div className="media-card-poster placeholder">No image</div>
-              )}
-              <div className="media-card-body">
-                <h3>{item.title}</h3>
-                <p className="muted">{item.overview?.slice(0, 120)}…</p>
-                <ExternalHoverLink
-                  externalId={item.externalId}
-                  titleHint={item.title}
-                  posterHint={item.posterUrl}
-                >
-                  See more
-                </ExternalHoverLink>
-                {item.savedLocally && item.localMovieId !== null ? (
-                  <Link to={`/media/${item.localMovieId}`}>View local</Link>
-                ) : isAuthenticated ? (
-                  <button
-                    type="button"
-                    onClick={() => handleSave(item.externalId)}
-                    disabled={savingId === item.externalId}
-                  >
-                    {savingId === item.externalId
-                      ? "Saving…"
-                      : "Save to library"}
-                  </button>
+            <ExternalHoverCardWrap
+              key={item.externalId}
+              externalId={item.externalId}
+              titleHint={item.title}
+              posterHint={item.posterUrl}
+            >
+              <article className="media-card external-media-card">
+                {item.posterUrl ? (
+                  <img
+                    src={item.posterUrl}
+                    alt={item.title}
+                    className="media-card-poster"
+                  />
                 ) : (
-                  <small className="muted">Login to import.</small>
+                  <div className="media-card-poster placeholder">No image</div>
                 )}
-              </div>
-            </article>
+                <div className="media-card-body">
+                  <h3>{item.title}</h3>
+                  <p className="muted">{item.overview?.slice(0, 120)}…</p>
+                  <Link to={`/external/movie/${item.externalId}`}>See more</Link>
+                  {item.savedLocally && item.localMovieId !== null ? (
+                    <Link to={`/media/${item.localMovieId}`}>View local</Link>
+                  ) : isAuthenticated ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSave(item.externalId)}
+                      disabled={savingId === item.externalId}
+                    >
+                      {savingId === item.externalId
+                        ? "Saving…"
+                        : "Save to library"}
+                    </button>
+                  ) : (
+                    <small className="muted">Login to import.</small>
+                  )}
+                </div>
+              </article>
+            </ExternalHoverCardWrap>
           ))}
         </div>
       )}

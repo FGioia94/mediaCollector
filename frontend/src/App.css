@@ -801,7 +801,22 @@ fieldset {
 }
 
 .external-media-card {
+  position: relative;
   overflow: visible;
+}
+
+.external-media-card:hover {
+  z-index: 240;
+}
+
+.external-hover-trigger-wrap {
+  position: relative;
+  display: block;
+}
+
+.external-hover-trigger-wrap:hover,
+.external-hover-trigger-wrap:focus-within {
+  z-index: 220;
 }
 
 .external-hover-link-wrap {
@@ -813,7 +828,7 @@ fieldset {
   position: absolute;
   left: 0;
   top: calc(100% + 0.5rem);
-  z-index: 90;
+  z-index: 300;
   width: 280px;
   border-radius: 12px;
   border: 1px solid #d8c2a4;
