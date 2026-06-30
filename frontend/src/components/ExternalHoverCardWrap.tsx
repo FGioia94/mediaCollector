@@ -91,7 +91,6 @@ export function ExternalHoverCardWrap({
   const [trailer, setTrailer] = useState<ExternalTrailerResponse | null>(() => {
     return trailerCache.get(externalId) ?? null;
   });
-  const [muted, setMuted] = useState(true);
   const requestRef = useRef(0);
   const trailerRequestRef = useRef(0);
 
@@ -152,7 +151,7 @@ export function ExternalHoverCardWrap({
   }, [externalId, open, trailer]);
 
   const trailerSrc = trailer?.embedUrl
-    ? `${trailer.embedUrl}?autoplay=1&mute=${muted ? 1 : 0}&controls=1&rel=0&modestbranding=1&playsinline=1`
+    ? `${trailer.embedUrl}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1`
     : null;
 
   return (
@@ -204,16 +203,10 @@ export function ExternalHoverCardWrap({
                 </small>
                 <span className="external-hover-overview">{preview.overview}</span>
                 <span className="external-hover-actions">
-                  {trailerSrc ? (
-                    <button
-                      type="button"
-                      className="external-hover-audio"
-                      onClick={() => setMuted((prev) => !prev)}
-                    >
-                      {muted ? "Unmute trailer" : "Mute trailer"}
-                    </button>
-                  ) : loadingTrailer ? (
+                  {loadingTrailer ? (
                     <small className="muted">Loading trailer...</small>
+                  ) : trailerSrc ? (
+                    <small className="muted">Use the player controls for audio.</small>
                   ) : (
                     <small className="muted">Trailer unavailable</small>
                   )}

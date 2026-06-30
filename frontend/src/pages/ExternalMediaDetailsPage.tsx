@@ -27,6 +27,8 @@ export function ExternalMediaDetailsPage() {
   const [data, setData] = useState<EnrichedMediaDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingTrailer, setLoadingTrailer] = useState(true);
+  const [trailerEmbedUrl, setTrailerEmbedUrl] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,6 +45,13 @@ export function ExternalMediaDetailsPage() {
       .then(setData)
       .catch((err) => setError(errorMessage(err)))
       .finally(() => setLoading(false));
+
+    setLoadingTrailer(true);
+    external
+      .externalTrailer(id)
+      .then((trailer) => setTrailerEmbedUrl(trailer?.embedUrl ?? null))
+      .catch(() => setTrailerEmbedUrl(null))
+      .finally(() => setLoadingTrailer(false));
   }, [id]);
 
   const handleSave = async () => {
@@ -60,6 +69,9 @@ export function ExternalMediaDetailsPage() {
   if (!data) return <EmptyMsg>Movie details are unavailable.</EmptyMsg>;
 
   const posterUrl = normalizePosterUrl(data.posterUrl);
+  const trailerSrc = trailerEmbedUrl
+    ? `${trailerEmbedUrl}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1`
+    : null;
 
   return (
     <section className="details">
@@ -82,6 +94,24 @@ export function ExternalMediaDetailsPage() {
           {actionMsg && <p className="status">{actionMsg}</p>}
         </div>
       </header>
+
+      <section className="external-details-trailer-section">
+        <h2>Trailer</h2>
+        {loadingTrailer ? (
+          <p className="muted">Loading trailer...</p>
+        ) : trailerSrc ? (
+          <iframe
+            src={trailerSrc}
+            title={`${data.title} trailer`}
+            className="external-details-trailer"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <p className="muted">Trailer unavailable for this title.</p>
+        )}
+      </section>
     </section>
   );
 }
