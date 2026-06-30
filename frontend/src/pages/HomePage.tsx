@@ -21,7 +21,7 @@ export function HomePage() {
   useEffect(() => {
     media
       .topReviewed(12)
-      .then(setItems)
+      .then((rows) => setItems(Array.isArray(rows) ? rows : []))
       .catch((err) => setError(errorMessage(err)));
 
     external
@@ -30,13 +30,15 @@ export function HomePage() {
       .catch((err) => setTrendingError(errorMessage(err)));
   }, []);
 
-  const totalItems = items?.length ?? 0;
-  const withPoster = items?.filter((item) => !!item.posterUrl).length ?? 0;
-  const oldestYear = items
+  const safeItems = Array.isArray(items) ? items : [];
+
+  const totalItems = safeItems.length;
+  const withPoster = safeItems.filter((item) => !!item.posterUrl).length;
+  const oldestYear = safeItems
     ?.map((item) => Number(item.releaseDate?.slice(0, 4)))
     .filter((year) => Number.isFinite(year) && year > 0)
     .sort((a, b) => a - b)[0];
-  const heroItem = items?.[0] ?? null;
+  const heroItem = safeItems[0] ?? null;
 
   return (
     <section className="home-page">
@@ -140,10 +142,10 @@ export function HomePage() {
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
       {!error && items === null && <Loading />}
-      {items && items.length === 0 && <EmptyMsg>Nothing here yet.</EmptyMsg>}
-      {items && items.length > 0 && (
+      {items && safeItems.length === 0 && <EmptyMsg>Nothing here yet.</EmptyMsg>}
+      {items && safeItems.length > 0 && (
         <div className="media-grid home-grid">
-          {items.map((item) => (
+          {safeItems.map((item) => (
             <MediaCard key={item.id} media={item} />
           ))}
         </div>
