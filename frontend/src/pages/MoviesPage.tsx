@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 
 import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
-import { MediaHoverLink } from "../components/MediaHoverLink";
 import {
   EmptyMsg,
   ErrorMsg,
-  SkeletonTable,
+  SkeletonCardGrid,
   errorMessage,
 } from "../components/StatusViews";
 import type { MovieResponse } from "../types";
@@ -50,55 +49,37 @@ export function MoviesPage() {
       </header>
       {error && <ErrorMsg>{error}</ErrorMsg>}
       {actionMsg && <p className="status">{actionMsg}</p>}
-      {items === null && !error && <SkeletonTable rows={6} cols={5} />}
+      {items === null && !error && <SkeletonCardGrid count={8} />}
       {items && items.length === 0 && <EmptyMsg>No movies yet.</EmptyMsg>}
       {items && items.length > 0 && (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Director</th>
-              <th>Year</th>
-              <th>Duration</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((movie) => (
-              <tr key={movie.id}>
-                <td data-label="Title">
-                  <MediaHoverLink
-                    mediaId={movie.id}
-                    previewHint={{
-                      title: movie.title,
-                      posterUrl: movie.posterUrl,
-                      releaseDate: movie.releaseDate,
-                      kind: "Movie",
-                    }}
-                  >
-                    {movie.title}
-                  </MediaHoverLink>
-                </td>
-                <td data-label="Director">{movie.director}</td>
-                <td data-label="Year">{movie.releaseDate}</td>
-                <td data-label="Duration">{movie.duration} min</td>
-                <td data-label="Actions" className="row-actions">
-                  {isAuthenticated && (
-                    <>
-                      <Link to={`/movies/${movie.id}/edit`}>Edit</Link>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(movie.id)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="media-grid">
+          {items.map((movie) => (
+            <article key={movie.id} className="media-card">
+              {movie.posterUrl ? (
+                <img src={movie.posterUrl} alt={movie.title} className="media-card-poster" />
+              ) : (
+                <div className="media-card-poster placeholder">No image</div>
+              )}
+              <div className="media-card-body">
+                <h3>{movie.title}</h3>
+                <div className="media-card-meta">
+                  <span>{movie.releaseDate?.slice(0, 4) || "N/A"}</span>
+                  <span>{movie.duration} min</span>
+                </div>
+                <p className="muted">{movie.director ? `Director: ${movie.director}` : "Director unavailable"}</p>
+                <Link to={`/media/${movie.id}`}>See details</Link>
+                {isAuthenticated && (
+                  <div className="row-actions">
+                    <Link to={`/movies/${movie.id}/edit`}>Edit</Link>
+                    <button type="button" onClick={() => handleDelete(movie.id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
       )}
     </section>
   );

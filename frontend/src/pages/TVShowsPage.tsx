@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 
 import * as tvshows from "../api/tvshows";
 import { useAuth } from "../auth/AuthContext";
-import { MediaHoverLink } from "../components/MediaHoverLink";
 import {
   EmptyMsg,
   ErrorMsg,
-  SkeletonTable,
+  SkeletonCardGrid,
   errorMessage,
 } from "../components/StatusViews";
 import type { TVShowResponse } from "../types";
@@ -50,52 +49,38 @@ export function TVShowsPage() {
       </header>
       {error && <ErrorMsg>{error}</ErrorMsg>}
       {actionMsg && <p className="status">{actionMsg}</p>}
-      {items === null && !error && <SkeletonTable rows={6} cols={5} />}
+      {items === null && !error && <SkeletonCardGrid count={8} />}
       {items && items.length === 0 && <EmptyMsg>No shows yet.</EmptyMsg>}
       {items && items.length > 0 && (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Network</th>
-              <th>Seasons</th>
-              <th>Episodes</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((tv) => (
-              <tr key={tv.id}>
-                <td data-label="Title">
-                  <MediaHoverLink
-                    mediaId={tv.id}
-                    previewHint={{
-                      title: tv.title,
-                      posterUrl: tv.posterUrl,
-                      releaseDate: tv.releaseDate,
-                      kind: "TV Show",
-                    }}
-                  >
-                    {tv.title}
-                  </MediaHoverLink>
-                </td>
-                <td data-label="Network">{tv.network}</td>
-                <td data-label="Seasons">{tv.seasons}</td>
-                <td data-label="Episodes">{tv.episodes}</td>
-                <td data-label="Actions" className="row-actions">
-                  {isAuthenticated && (
-                    <>
-                      <Link to={`/tvshows/${tv.id}/edit`}>Edit</Link>
-                      <button type="button" onClick={() => handleDelete(tv.id)}>
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="media-grid">
+          {items.map((tv) => (
+            <article key={tv.id} className="media-card">
+              {tv.posterUrl ? (
+                <img src={tv.posterUrl} alt={tv.title} className="media-card-poster" />
+              ) : (
+                <div className="media-card-poster placeholder">No image</div>
+              )}
+              <div className="media-card-body">
+                <h3>{tv.title}</h3>
+                <div className="media-card-meta">
+                  <span>{tv.network || "Network n/a"}</span>
+                  <span>{tv.seasons} season(s)</span>
+                  <span>{tv.episodes} episodes</span>
+                </div>
+                <p className="muted">{tv.releaseDate || "Release date unavailable"}</p>
+                <Link to={`/media/${tv.id}`}>See details</Link>
+                {isAuthenticated && (
+                  <div className="row-actions">
+                    <Link to={`/tvshows/${tv.id}/edit`}>Edit</Link>
+                    <button type="button" onClick={() => handleDelete(tv.id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
       )}
     </section>
   );
