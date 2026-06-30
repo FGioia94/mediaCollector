@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import * as external from "../api/external";
 import * as media from "../api/media";
 import { MediaCard } from "../components/MediaCard";
 import {
@@ -9,17 +10,24 @@ import {
   Loading,
   errorMessage,
 } from "../components/StatusViews";
-import type { MediaItemResponse } from "../types";
+import type { MediaItemResponse, TrendingMediaResponse } from "../types";
 
 export function HomePage() {
   const [items, setItems] = useState<MediaItemResponse[] | null>(null);
+  const [trending, setTrending] = useState<TrendingMediaResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [trendingError, setTrendingError] = useState<string | null>(null);
 
   useEffect(() => {
     media
       .topReviewed(12)
       .then(setItems)
       .catch((err) => setError(errorMessage(err)));
+
+    external
+      .trending()
+      .then((rows) => setTrending(rows.slice(0, 3)))
+      .catch((err) => setTrendingError(errorMessage(err)));
   }, []);
 
   const totalItems = items?.length ?? 0;
@@ -90,6 +98,44 @@ export function HomePage() {
       <div className="home-section-head">
         <h2>Top reviewed</h2>
         <Link to="/reviews">Go to reviews</Link>
+      </div>
+
+      <div className="home-quick-nav" aria-label="Home shortcuts">
+        <Link to="/discover" className="home-quick-card">
+          <h3>Discover</h3>
+          <p>Filter by genre, year, type and rating to explore the local catalog.</p>
+        </Link>
+        <Link to="/trending" className="home-quick-card">
+          <h3>Trending Anticipation</h3>
+          <p>Track TMDB buzz and import promising titles into your workspace.</p>
+        </Link>
+        <Link to="/reviews" className="home-quick-card">
+          <h3>Top Rated Workflow</h3>
+          <p>Audit quality signals, compare scores and keep curation standards high.</p>
+        </Link>
+      </div>
+
+      <div className="home-trending-strip">
+        <div className="home-section-head">
+          <h2>Anticipation Radar</h2>
+          <Link to="/trending">Open full trending board</Link>
+        </div>
+        {trendingError && <ErrorMsg>{trendingError}</ErrorMsg>}
+        {!trendingError && trending === null && <Loading label="Loading anticipation picks..." />}
+        {trending && trending.length > 0 && (
+          <div className="home-trending-list">
+            {trending.map((entry) => (
+              <article key={entry.externalId} className="home-trending-item">
+                <h3>{entry.title}</h3>
+                <p>{entry.overview || "No overview available yet."}</p>
+                <div className="home-trending-meta">
+                  <span>{entry.savedLocally ? "Already imported" : "Awaiting import"}</span>
+                  <Link to={`/external/movie/${entry.externalId}`}>View source</Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && <ErrorMsg>{error}</ErrorMsg>}

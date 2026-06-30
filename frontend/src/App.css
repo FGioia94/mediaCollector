@@ -451,6 +451,94 @@ fieldset {
   gap: 0.9rem;
 }
 
+.home-quick-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.home-quick-card {
+  display: block;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(180, 160, 130, 0.44);
+  border-radius: 14px;
+  padding: 0.78rem 0.84rem;
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.home-quick-card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: #97c8c0;
+  box-shadow: 0 12px 22px rgba(40, 61, 49, 0.16);
+}
+
+.home-quick-card h3 {
+  margin: 0 0 0.28rem;
+  font-size: 1rem;
+}
+
+.home-quick-card p {
+  margin: 0;
+  color: #665a49;
+  font-size: 0.84rem;
+}
+
+.home-trending-strip {
+  background: linear-gradient(160deg, rgba(226, 239, 242, 0.68) 0%, rgba(250, 240, 224, 0.64) 100%);
+  border: 1px solid rgba(170, 155, 128, 0.4);
+  border-radius: 14px;
+  padding: 0.85rem;
+}
+
+.home-trending-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.68rem;
+}
+
+.home-trending-item {
+  background: rgba(255, 253, 249, 0.82);
+  border: 1px solid rgba(172, 155, 126, 0.45);
+  border-radius: 12px;
+  padding: 0.66rem;
+}
+
+.home-trending-item h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.home-trending-item p {
+  margin: 0.42rem 0 0;
+  color: #5f5445;
+  font-size: 0.82rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.home-trending-meta {
+  margin-top: 0.58rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: #6b5d49;
+  font-size: 0.75rem;
+}
+
+.home-trending-meta a {
+  font-weight: 600;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -1224,6 +1312,11 @@ fieldset {
   }
 
   .home-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .home-quick-nav,
+  .home-trending-list {
     grid-template-columns: 1fr;
   }
 
