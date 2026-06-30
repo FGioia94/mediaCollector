@@ -83,6 +83,7 @@ export function ExternalHoverCardWrap({
   children,
 }: ExternalHoverCardWrapProps) {
   const [open, setOpen] = useState(false);
+  const [desktopHoverEnabled, setDesktopHoverEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
   const [preview, setPreview] = useState<ExternalHoverPreview | null>(() => {
@@ -93,6 +94,19 @@ export function ExternalHoverCardWrap({
   });
   const requestRef = useRef(0);
   const trailerRequestRef = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1024px)");
+    const sync = () => setDesktopHoverEnabled(mediaQuery.matches);
+    sync();
+
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!open || preview) return;
@@ -157,14 +171,14 @@ export function ExternalHoverCardWrap({
   return (
     <div
       className="external-hover-trigger-wrap"
-      onMouseEnter={() => setOpen(true)}
+      onMouseEnter={() => desktopHoverEnabled && setOpen(true)}
       onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
+      onFocus={() => desktopHoverEnabled && setOpen(true)}
       onBlur={() => setOpen(false)}
     >
       {children}
 
-      {open && (
+      {desktopHoverEnabled && open && (
         <span className="external-hover-card" role="tooltip" aria-live="polite">
           {loading ? (
             <>
@@ -205,8 +219,6 @@ export function ExternalHoverCardWrap({
                 <span className="external-hover-actions">
                   {loadingTrailer ? (
                     <small className="muted">Loading trailer...</small>
-                  ) : trailerSrc ? (
-                    <small className="muted">Use the player controls for audio.</small>
                   ) : (
                     <small className="muted">Trailer unavailable</small>
                   )}
