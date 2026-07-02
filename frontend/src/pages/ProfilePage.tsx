@@ -10,7 +10,7 @@ import { getCroppedImageDataUrl } from "../utils/imageCrop";
 import { validatePassword } from "../utils/validation";
 
 export function ProfilePage() {
-  const { email, userId, logout } = useAuth();
+  const { email, username, userId, logout } = useAuth();
   const [profileImageDraft, setProfileImageDraft] = useState("");
   const [loadingImage, setLoadingImage] = useState(false);
   const [imageSaved, setImageSaved] = useState(false);
@@ -192,8 +192,9 @@ export function ProfilePage() {
       <p className="eyebrow">Account workspace</p>
       <h1>Profile</h1>
       <p>
-        Signed in as <strong>{email}</strong>.
+        Signed in as <strong>{username}</strong>.
       </p>
+      {email && <p className="form-help">Email: {email}</p>}
       {userId !== null && <p className="form-help">Your account id is {userId}.</p>}
 
       <hr className="profile-divider" />

@@ -10,6 +10,10 @@ public class RegisterRequest {
     @Email(message = "Input a valid email")
     private String email;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 32, message = "Username must be 3-32 characters")
+    private String username;
+
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 16, message = "Password should be 8-16 characters")
     private String password;
@@ -30,6 +34,10 @@ public class RegisterRequest {
         return password;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -48,6 +56,10 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setFirstName(String firstName) {

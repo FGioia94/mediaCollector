@@ -73,7 +73,14 @@ function App() {
               }
             />
 
-            <Route path="/genres" element={<GenresPage />} />
+            <Route
+              path="/genres"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <GenresPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/trending" element={<TrendingPage />} />
             <Route path="/external" element={<ExternalSearchPage />} />
@@ -98,7 +105,7 @@ function App() {
             <Route
               path="/admin/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin>
                   <AdminUsersPage />
                 </ProtectedRoute>
               }
@@ -106,7 +113,7 @@ function App() {
             <Route
               path="/admin/roles"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin>
                   <AdminRolesPage />
                 </ProtectedRoute>
               }

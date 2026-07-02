@@ -35,10 +35,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addUser(User user) {
         String normalizedEmail = EmailNormalizer.normalize(user.getEmail());
+        String normalizedUsername = normalizeUsername(user.getUsernameValue());
         user.setEmail(normalizedEmail);
+        user.setUsernameValue(normalizedUsername);
 
         if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             throw new DuplicateKeyException("User already exists for email: " + normalizedEmail);
+        }
+        if (userRepository.findByUsernameIgnoreCase(normalizedUsername).isPresent()) {
+            throw new DuplicateKeyException("User already exists for username: " + normalizedUsername);
         }
         Optional<Role> userRole = roleRepository.findByName("USER");
         if (userRole.isPresent()) {
@@ -87,6 +92,15 @@ public class UserServiceImpl implements UserService {
             // Keep stored emails normalized for case-insensitive retrieval.
             existing.setEmail(EmailNormalizer.normalize(updates.getEmail()));
         }
+        if (updates.getUsernameValue() != null) {
+            String normalizedUsername = normalizeUsername(updates.getUsernameValue());
+            userRepository.findByUsernameIgnoreCase(normalizedUsername)
+                    .filter(other -> !other.getId().equals(existing.getId()))
+                    .ifPresent(other -> {
+                        throw new DuplicateKeyException("Username already exists: " + normalizedUsername);
+                    });
+            existing.setUsernameValue(normalizedUsername);
+        }
         if (updates.getPassword() != null) {
             // Re-hash password on update when a new value is provided.
             existing.setPassword(passwordEncoder.encode(updates.getPassword()));
@@ -124,6 +138,33 @@ public class UserServiceImpl implements UserService {
         String normalizedEmail = EmailNormalizer.normalize(email);
         return userRepository.findByEmailIgnoreCase(normalizedEmail)
             .orElseThrow(() -> new UserNotFoundException(normalizedEmail));
+    }
+
+    @Override
+    public User getByLoginIdentifier(String identifier) {
+        String normalizedIdentifier = identifier == null ? "" : identifier.trim();
+        if (normalizedIdentifier.contains("@")) {
+            String normalizedEmail = EmailNormalizer.normalize(normalizedIdentifier);
+            return userRepository.findByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new UserNotFoundException(normalizedIdentifier));
+        }
+        return userRepository.findByUsernameIgnoreCase(normalizedIdentifier)
+                .orElseThrow(() -> new UserNotFoundException(normalizedIdentifier));
+    }
+
+    private String normalizeUsername(String username) {
+        if (username == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Username is required");
+        }
+
+        String normalized = username.trim();
+        if (normalized.length() < 3 || normalized.length() > 32) {
+            throw new ResponseStatusException(BAD_REQUEST, "Username must be 3-32 characters");
+        }
+        if (!normalized.matches("^[A-Za-z0-9_]+$")) {
+            throw new ResponseStatusException(BAD_REQUEST, "Username can contain only letters, numbers, and underscore");
+        }
+        return normalized;
     }
 
 }

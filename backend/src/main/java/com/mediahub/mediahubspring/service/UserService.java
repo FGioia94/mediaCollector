@@ -25,4 +25,6 @@ public interface UserService {
 
     public User getByEmail(String email);
 
+    public User getByLoginIdentifier(String identifier);
+
 }

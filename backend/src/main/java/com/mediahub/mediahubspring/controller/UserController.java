@@ -42,6 +42,7 @@ public class UserController {
         created.setFirstName(request.getFirstName());
         created.setLastName(request.getLastName());
         created.setEmail(request.getEmail());
+        created.setUsernameValue(request.getUsername());
         created.setPassword(request.getPassword());
         created.setProfileImage(request.getProfileImage());
         User saved = service.addUser(created);
@@ -50,6 +51,7 @@ public class UserController {
                 saved.getFirstName(),
                 saved.getLastName(),
                 saved.getEmail(),
+            saved.getUsernameValue(),
                 isSystemAdmin(saved),
             saved.getProfileImage(),
                 saved.getRoles(),
@@ -65,6 +67,7 @@ public class UserController {
                         user.getFirstName(),
                         user.getLastName(),
                         user.getEmail(),
+                        user.getUsernameValue(),
                         isSystemAdmin(user),
                         user.getProfileImage(),
                         user.getRoles(),
@@ -80,7 +83,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse getMe(Authentication authentication) {
-        User user = service.getByEmail(authentication.getName());
+        User user = service.getByLoginIdentifier(authentication.getName());
         return toResponse(user);
     }
 
@@ -100,6 +103,7 @@ public class UserController {
         existing.setFirstName(request.getFirstName());
         existing.setLastName(request.getLastName());
         existing.setEmail(request.getEmail());
+        existing.setUsernameValue(request.getUsername());
         existing.setPassword(request.getPassword());
         existing.setProfileImage(request.getProfileImage());
 
@@ -110,7 +114,7 @@ public class UserController {
     @PutMapping({"/me/profile-image", "/me/profile-image/"})
     public UserResponse updateMyProfileImage(Authentication authentication,
                                              @Valid @RequestBody ProfileImageUpdateRequest request) {
-        User user = service.getByEmail(authentication.getName());
+        User user = service.getByLoginIdentifier(authentication.getName());
         User updated = service.updateProfileImage(user.getId(), request.getProfileImage());
         return toResponse(updated);
     }
@@ -140,6 +144,7 @@ public class UserController {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getUsernameValue(),
                 isSystemAdmin(user),
                 user.getProfileImage(),
                 user.getRoles(),

@@ -27,14 +27,14 @@ public class ProfileController {
 
     @GetMapping({"/me", "/me/"})
     public UserResponse getMe(Authentication authentication) {
-        User user = userService.getByEmail(authentication.getName());
+        User user = userService.getByLoginIdentifier(authentication.getName());
         return toResponse(user);
     }
 
     @PutMapping({"/me/image", "/me/image/"})
     public UserResponse updateMyProfileImage(Authentication authentication,
                                              @Valid @RequestBody ProfileImageUpdateRequest request) {
-        User user = userService.getByEmail(authentication.getName());
+        User user = userService.getByLoginIdentifier(authentication.getName());
         User updated = userService.updateProfileImage(user.getId(), request.getProfileImage());
         return toResponse(updated);
     }
@@ -42,7 +42,7 @@ public class ProfileController {
     @PutMapping({"/me/password", "/me/password/"})
     public Map<String, String> changeMyPassword(Authentication authentication,
                                                 @Valid @RequestBody ChangePasswordRequest request) {
-        User user = userService.getByEmail(authentication.getName());
+        User user = userService.getByLoginIdentifier(authentication.getName());
         userService.changePassword(user.getId(), request.getCurrentPassword(), request.getNewPassword());
         return Map.of("message", "Password updated successfully.");
     }
@@ -53,6 +53,7 @@ public class ProfileController {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+            user.getUsernameValue(),
                 user.getProfileImage(),
                 user.getRoles(),
                 user.getCreatedAt());

@@ -13,6 +13,9 @@ public class UserRequest {
     @Email(message = "Input a valid email")
     private String email;
 
+    @NotBlank(message = "Username is required")
+    private String username;
+
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 16, message = "Password should be 8-16 characters")
     private String password;
@@ -24,11 +27,13 @@ public class UserRequest {
     public UserRequest(String firstName,
                        String lastName,
                        String email,
+                       String username,
                        String password,
                        String profileImage) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.username = username;
         this.password = password;
         this.profileImage = profileImage;
     }
@@ -45,6 +50,10 @@ public class UserRequest {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     public String getPassword() {
@@ -68,6 +77,10 @@ public class UserRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setPassword(String password) {

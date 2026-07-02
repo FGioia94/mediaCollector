@@ -152,8 +152,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/tvshows/**").hasAnyRole("EDITOR", "ADMIN")
 
                         // Genres
-                        .requestMatchers(HttpMethod.POST, "/genres").hasAnyRole("EDITOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/genres/**").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/genres").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/genres/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/genres/**").hasRole("ADMIN")
 
                         // ---------------------------------------------------------
                         // ADMIN ONLY ENDPOINTS (system-level operations)

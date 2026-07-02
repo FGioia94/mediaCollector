@@ -4,7 +4,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export function Navbar() {
-  const { isAuthenticated, email, logout } = useAuth();
+  const { isAuthenticated, username, logout, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,9 +51,11 @@ export function Navbar() {
           <li>
             <NavLink to="/tvshows">TV Shows</NavLink>
           </li>
-          <li>
-            <NavLink to="/genres">Genres</NavLink>
-          </li>
+          {isAdmin && (
+            <li>
+              <NavLink to="/genres">Genres</NavLink>
+            </li>
+          )}
           <li>
             <NavLink to="/reviews">Reviews</NavLink>
           </li>
@@ -71,12 +73,16 @@ export function Navbar() {
               <li>
                 <NavLink to="/profile">Profile</NavLink>
               </li>
-              <li>
-                <NavLink to="/admin/users">Admin: Users</NavLink>
-              </li>
-              <li>
-                <NavLink to="/admin/roles">Admin: Roles</NavLink>
-              </li>
+              {isAdmin && (
+                <>
+                  <li>
+                    <NavLink to="/admin/users">Admin: Users</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/admin/roles">Admin: Roles</NavLink>
+                  </li>
+                </>
+              )}
             </>
           )}
         </ul>
@@ -84,7 +90,7 @@ export function Navbar() {
         <div className="navbar-auth">
         {isAuthenticated ? (
           <>
-            <span className="navbar-email">{email}</span>
+            <span className="navbar-email">{username}</span>
             <button type="button" onClick={handleLogout}>
               Logout
             </button>

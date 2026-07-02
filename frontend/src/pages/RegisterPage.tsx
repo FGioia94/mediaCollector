@@ -8,6 +8,7 @@ import {
   validateEmail,
   validatePassword,
   validatePersonName,
+  validateUsername,
 } from "../utils/validation";
 
 export function RegisterPage() {
@@ -16,6 +17,7 @@ export function RegisterPage() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,11 @@ export function RegisterPage() {
       setError(emailError);
       return;
     }
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
+      return;
+    }
     const passwordError = validatePassword(password);
     if (passwordError) {
       setError(passwordError);
@@ -50,6 +57,7 @@ export function RegisterPage() {
       await register({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        username: username.trim(),
         email: email.trim(),
         password,
       });
@@ -83,6 +91,16 @@ export function RegisterPage() {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
+          />
+        </label>
+        <label>
+          Username
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            autoComplete="username"
           />
         </label>
         <label>

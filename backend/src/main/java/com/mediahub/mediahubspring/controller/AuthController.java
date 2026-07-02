@@ -18,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -48,9 +50,11 @@ public class AuthController {
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         // Normalize once at the API boundary to keep auth lookups consistent.
         String normalizedEmail = EmailNormalizer.normalize(request.getEmail());
+        String normalizedUsername = normalizeUsername(request.getUsername());
 
         User user = new User();
         user.setEmail(normalizedEmail);
+        user.setUsernameValue(normalizedUsername);
         user.setPassword(request.getPassword());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -64,7 +68,7 @@ public class AuthController {
 
         String token = jwtService.generateToken(saved);
 
-        return new AuthResponse(token, saved.getEmail(), saved.getId());
+        return new AuthResponse(token, saved.getEmail(), saved.getUsernameValue(), saved.getId(), roleNames(saved));
     }
 
     // ---------------------------------------------------------
@@ -72,21 +76,20 @@ public class AuthController {
     // ---------------------------------------------------------
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody AuthRequest request) {
-        // Login uses the same normalized identifier used at registration time.
-        String normalizedEmail = EmailNormalizer.normalize(request.getEmail());
+        String normalizedIdentifier = normalizeIdentifier(request.getIdentifier());
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                normalizedEmail,
+                normalizedIdentifier,
                         request.getPassword()
                 )
         );
 
-        User user = userService.getByEmail(normalizedEmail);
+        User user = userService.getByLoginIdentifier(normalizedIdentifier);
 
         String token = jwtService.generateToken(user);
 
-        return new AuthResponse(token, user.getEmail(), user.getId());
+        return new AuthResponse(token, user.getEmail(), user.getUsernameValue(), user.getId(), roleNames(user));
     }
 
     @PostMapping("/forgot-password")
@@ -105,5 +108,27 @@ public class AuthController {
     public Map<String, String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request.getToken(), request.getPassword());
         return Map.of("message", "Password updated successfully.");
+    }
+
+    private String normalizeIdentifier(String identifier) {
+        if (identifier == null) {
+            return "";
+        }
+        String trimmed = identifier.trim();
+        if (trimmed.contains("@")) {
+            return EmailNormalizer.normalize(trimmed);
+        }
+        return normalizeUsername(trimmed);
+    }
+
+    private String normalizeUsername(String username) {
+        if (username == null) {
+            return "";
+        }
+        return username.trim();
+    }
+
+    private Set<String> roleNames(User user) {
+        return user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
     }
 }

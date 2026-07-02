@@ -85,7 +85,7 @@ public class ReviewController {
         return new ReviewResponse(
                 review.getId(),
                 review.getAuthor().getId(),
-                review.getAuthor().getUsername(),
+                review.getAuthor().getUsernameValue(),
                 review.getText(),
                 review.getMediaItem().getId(),
                 review.getMediaItem().getTitle(),

@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 import { ErrorMsg, errorMessage } from "../components/StatusViews";
-import { validateEmail } from "../utils/validation";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -14,16 +13,15 @@ export function LoginPage() {
     (location.state as { from?: { pathname: string } } | null)?.from
       ?.pathname ?? "/";
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    const emailError = validateEmail(email);
-    if (emailError) {
-      setError(emailError);
+    if (!identifier.trim()) {
+      setError("Email or username is required.");
       return;
     }
     if (!password.trim()) {
@@ -33,7 +31,7 @@ export function LoginPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await login(email.trim(), password);
+      await login(identifier.trim(), password);
       navigate(from, { replace: true });
     } catch (err) {
       setError(errorMessage(err));
@@ -49,13 +47,13 @@ export function LoginPage() {
       <p className="form-help">Access your catalog, editorial tools, and review workspace.</p>
       <form onSubmit={handleSubmit} className="vstack">
         <label>
-          Email
+          Email or username
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
-            autoComplete="email"
+            autoComplete="username"
           />
         </label>
         <label>

@@ -17,6 +17,7 @@ public class UserResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private String username;
     private String profileImage;
     private boolean systemAdmin;
     private Set<Role> roles;
@@ -29,6 +30,7 @@ public class UserResponse {
                         String firstName,
                         String lastName,
                         String email,
+                        String username,
                         boolean systemAdmin,
                         String profileImage,
                         Set<Role> roles,
@@ -37,6 +39,7 @@ public class UserResponse {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.username = username;
         this.systemAdmin = systemAdmin;
         this.profileImage = profileImage;
         this.roles = roles;
@@ -47,10 +50,11 @@ public class UserResponse {
                         String firstName,
                         String lastName,
                         String email,
+                        String username,
                         String profileImage,
                         Set<Role> roles,
                         LocalDateTime createdAt) {
-        this(id, firstName, lastName, email, false, profileImage, roles, createdAt);
+        this(id, firstName, lastName, email, username, false, profileImage, roles, createdAt);
     }
 
     // GETTERS
@@ -69,6 +73,10 @@ public class UserResponse {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     public String getProfileImage() {

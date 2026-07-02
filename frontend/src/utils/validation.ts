@@ -1,6 +1,7 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const NAME_RE = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/;
 const ROLE_RE = /^[A-Z][A-Z0-9_]{1,29}$/;
+const USERNAME_RE = /^[A-Za-z0-9_]{3,32}$/;
 
 function isBlank(value: string): boolean {
   return value.trim().length === 0;
@@ -37,6 +38,15 @@ export function validateRoleName(value: string): string | null {
   if (!trimmed) return "Role name is required.";
   if (!ROLE_RE.test(trimmed)) {
     return "Role must be uppercase and can include numbers/underscores (e.g. EDITOR).";
+  }
+  return null;
+}
+
+export function validateUsername(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return "Username is required.";
+  if (!USERNAME_RE.test(trimmed)) {
+    return "Username must be 3-32 chars using letters, numbers, or underscore.";
   }
   return null;
 }

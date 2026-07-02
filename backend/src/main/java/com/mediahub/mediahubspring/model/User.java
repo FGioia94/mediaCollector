@@ -31,6 +31,10 @@ public class User implements UserDetails {
     private String email;
 
     @NotBlank
+    @Column(nullable = false, unique = true, length = 32)
+    private String username;
+
+    @NotBlank
     private String password;
 
     @Column(columnDefinition = "TEXT")
@@ -97,6 +101,10 @@ public class User implements UserDetails {
         return email;
     }
 
+    public String getUsernameValue() {
+        return username;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -135,6 +143,10 @@ public class User implements UserDetails {
         this.email = email;
     }
 
+    public void setUsernameValue(String username) {
+        this.username = username;
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -162,7 +174,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

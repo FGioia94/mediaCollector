@@ -1,7 +1,7 @@
 // Shared TypeScript types mirroring the Spring backend DTOs.
 
 export interface AuthRequest {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -20,6 +20,7 @@ export interface MessageResponse {
 }
 
 export interface RegisterRequest {
+  username: string;
   email: string;
   password: string;
   firstName: string;
@@ -29,7 +30,9 @@ export interface RegisterRequest {
 export interface AuthResponse {
   token: string;
   email: string;
+  username: string;
   userId: number;
+  roles: string[];
 }
 
 export interface Role {
@@ -43,6 +46,7 @@ export interface UserResponse {
   firstName: string;
   lastName: string;
   email: string;
+  username: string;
   systemAdmin: boolean;
   profileImage?: string;
   roles: Role[];
@@ -53,6 +57,7 @@ export interface UserRequest {
   firstName: string;
   lastName: string;
   email: string;
+  username: string;
   password: string;
   profileImage?: string;
 }

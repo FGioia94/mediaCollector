@@ -18,9 +18,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username){
-        String normalizedEmail = EmailNormalizer.normalize(username);
-        User user = repository.findWithRolesByEmailIgnoreCase(normalizedEmail)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + normalizedEmail));
+        String normalizedIdentifier = username == null ? "" : username.trim();
+        User user;
+
+        if (normalizedIdentifier.contains("@")) {
+            String normalizedEmail = EmailNormalizer.normalize(normalizedIdentifier);
+            user = repository.findWithRolesByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + normalizedIdentifier));
+        } else {
+            user = repository.findWithRolesByUsernameIgnoreCase(normalizedIdentifier)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + normalizedIdentifier));
+        }
+
         return new UserDetailsImpl(user);
     }
 }

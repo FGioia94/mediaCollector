@@ -14,16 +14,21 @@ import type { RegisterRequest } from "../types";
 
 const USER_ID_KEY = "mediahub.userId";
 const EMAIL_KEY = "mediahub.email";
+const USERNAME_KEY = "mediahub.username";
+const ROLES_KEY = "mediahub.roles";
 
 interface AuthState {
   token: string | null;
   email: string | null;
+  username: string | null;
   userId: number | null;
+  roles: string[];
 }
 
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  isAdmin: boolean;
+  login: (identifier: string, password: string) => Promise<void>;
   register: (body: RegisterRequest) => Promise<void>;
   logout: () => void;
 }
@@ -32,10 +37,13 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function readInitial(): AuthState {
   const storedId = localStorage.getItem(USER_ID_KEY);
+  const storedRoles = localStorage.getItem(ROLES_KEY);
   return {
     token: getToken(),
     email: localStorage.getItem(EMAIL_KEY),
+    username: localStorage.getItem(USERNAME_KEY),
     userId: storedId ? Number(storedId) : null,
+    roles: storedRoles ? (JSON.parse(storedRoles) as string[]) : [],
   };
 }
 
@@ -48,18 +56,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [state.email]);
 
   useEffect(() => {
+    if (state.username) localStorage.setItem(USERNAME_KEY, state.username);
+    else localStorage.removeItem(USERNAME_KEY);
+  }, [state.username]);
+
+  useEffect(() => {
     if (state.userId === null) localStorage.removeItem(USER_ID_KEY);
     else localStorage.setItem(USER_ID_KEY, String(state.userId));
   }, [state.userId]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const response = await authApi.login({ email, password });
+  useEffect(() => {
+    localStorage.setItem(ROLES_KEY, JSON.stringify(state.roles));
+  }, [state.roles]);
+
+  const login = useCallback(async (identifier: string, password: string) => {
+    const response = await authApi.login({ identifier, password });
     setToken(response.token);
     setState((prev) => ({
       ...prev,
       token: response.token,
       email: response.email,
+      username: response.username,
       userId: response.userId,
+      roles: response.roles,
     }));
   }, []);
 
@@ -70,7 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ...prev,
       token: response.token,
       email: response.email,
+      username: response.username,
       userId: response.userId,
+      roles: response.roles,
     }));
   }, []);
 
@@ -78,13 +99,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     localStorage.removeItem(USER_ID_KEY);
     localStorage.removeItem(EMAIL_KEY);
-    setState({ token: null, email: null, userId: null });
+    localStorage.removeItem(USERNAME_KEY);
+    localStorage.removeItem(ROLES_KEY);
+    setState({ token: null, email: null, username: null, userId: null, roles: [] });
   }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       ...state,
       isAuthenticated: !!state.token,
+      isAdmin: state.roles.includes("ADMIN"),
       login,
       register,
       logout,
