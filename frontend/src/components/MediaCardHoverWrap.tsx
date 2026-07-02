@@ -72,6 +72,7 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
   });
 
   const requestRef = useRef(0);
+  const hoverDelayRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
@@ -113,22 +114,45 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
     return !!target.closest("button, a, .card-actions");
   };
 
+  const clearHoverDelay = () => {
+    if (hoverDelayRef.current !== null) {
+      window.clearTimeout(hoverDelayRef.current);
+      hoverDelayRef.current = null;
+    }
+  };
+
+  const scheduleOpen = () => {
+    clearHoverDelay();
+    hoverDelayRef.current = window.setTimeout(() => {
+      setOpen(true);
+      hoverDelayRef.current = null;
+    }, 1500);
+  };
+
+  useEffect(() => {
+    return () => clearHoverDelay();
+  }, []);
+
   return (
     <div
       className="media-hover-trigger-wrap"
       onMouseEnter={(event) => {
         if (!desktopHoverEnabled || isInteractiveTarget(event.target)) return;
-        setOpen(true);
+        scheduleOpen();
       }}
       onMouseMove={(event) => {
         if (!desktopHoverEnabled) return;
         if (isInteractiveTarget(event.target)) {
+          clearHoverDelay();
           if (open) setOpen(false);
           return;
         }
-        if (!open) setOpen(true);
+        if (!open && hoverDelayRef.current === null) scheduleOpen();
       }}
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={() => {
+        clearHoverDelay();
+        setOpen(false);
+      }}
       onFocus={(event) => {
         if (!desktopHoverEnabled || isInteractiveTarget(event.target)) return;
         setOpen(true);
