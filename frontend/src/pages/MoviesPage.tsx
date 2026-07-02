@@ -65,7 +65,7 @@ export function MoviesPage() {
                     <Link to={`/movies/${movie.id}/edit`} className="button-link ghost">
                       Edit
                     </Link>
-                    <button type="button" onClick={() => handleDelete(movie.id)}>
+                    <button type="button" className="button-link ghost" onClick={() => handleDelete(movie.id)}>
                       Delete
                     </button>
                   </>

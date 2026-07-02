@@ -126,7 +126,7 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
     hoverDelayRef.current = window.setTimeout(() => {
       setOpen(true);
       hoverDelayRef.current = null;
-    }, 1500);
+    }, 1000);
   };
 
   useEffect(() => {

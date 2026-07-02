@@ -13,6 +13,24 @@ import {
 import type { Genre, MediaItemResponse } from "../types";
 import { validateIntRange, validateNumberRange } from "../utils/validation";
 
+function normalizeDiscoverPayload(payload: unknown): MediaItemResponse[] {
+  if (Array.isArray(payload)) return payload as MediaItemResponse[];
+
+  if (payload && typeof payload === "object") {
+    const candidate = payload as {
+      results?: unknown;
+      content?: unknown;
+      items?: unknown;
+    };
+
+    if (Array.isArray(candidate.results)) return candidate.results as MediaItemResponse[];
+    if (Array.isArray(candidate.content)) return candidate.content as MediaItemResponse[];
+    if (Array.isArray(candidate.items)) return candidate.items as MediaItemResponse[];
+  }
+
+  return [];
+}
+
 export function DiscoverPage() {
   const [genreList, setGenreList] = useState<Genre[]>([]);
   const [title, setTitle] = useState("");
@@ -66,7 +84,7 @@ export function DiscoverPage() {
         sortBy,
         sortDir,
       });
-      setItems(result);
+      setItems(normalizeDiscoverPayload(result));
     } catch (err) {
       setError(errorMessage(err));
     } finally {

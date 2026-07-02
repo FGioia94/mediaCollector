@@ -188,7 +188,7 @@ export function ExternalHoverCardWrap({
     hoverDelayRef.current = window.setTimeout(() => {
       setOpen(true);
       hoverDelayRef.current = null;
-    }, 1500);
+    }, 1000);
   };
 
   useEffect(() => {

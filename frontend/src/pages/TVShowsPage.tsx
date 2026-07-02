@@ -65,7 +65,7 @@ export function TVShowsPage() {
                     <Link to={`/tvshows/${tv.id}/edit`} className="button-link ghost">
                       Edit
                     </Link>
-                    <button type="button" onClick={() => handleDelete(tv.id)}>
+                    <button type="button" className="button-link ghost" onClick={() => handleDelete(tv.id)}>
                       Delete
                     </button>
                   </>

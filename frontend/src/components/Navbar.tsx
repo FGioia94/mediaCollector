@@ -61,7 +61,7 @@ export function Navbar() {
             <NavLink to="/trending">Trending</NavLink>
           </li>
           <li>
-            <NavLink to="/external">TMDB Search</NavLink>
+            <NavLink to="/external">Search</NavLink>
           </li>
           {isAuthenticated && (
             <>

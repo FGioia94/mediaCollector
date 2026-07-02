@@ -110,7 +110,7 @@ export function ExternalSearchPage() {
 
   return (
     <section>
-      <h1>TMDB search</h1>
+      <h1>Search</h1>
       <form onSubmit={handleSearch} className="hstack">
         <div className="autocomplete">
           <input
