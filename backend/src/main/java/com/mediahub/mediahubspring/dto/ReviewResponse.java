@@ -10,11 +10,14 @@ public class ReviewResponse {
 
     private Long id;
     private Long authorId;
+    private String authorUsername;
 
     @NotBlank
     private String text;
 
     private Long mediaItemId;
+    private String mediaTitle;
+    private String mediaPosterUrl;
 
     private LocalDateTime createdAt;
 
@@ -25,14 +28,20 @@ public class ReviewResponse {
 
     public ReviewResponse(Long id,
                           Long authorId,
+                          String authorUsername,
                           String text,
                           Long mediaItemId,
+                          String mediaTitle,
+                          String mediaPosterUrl,
                           LocalDateTime createdAt,
                           Integer rating) {
         this.id = id;
         this.authorId = authorId;
+        this.authorUsername = authorUsername;
         this.text = text;
         this.mediaItemId = mediaItemId;
+        this.mediaTitle = mediaTitle;
+        this.mediaPosterUrl = mediaPosterUrl;
         this.createdAt = createdAt;
         this.rating = rating;
     }
@@ -48,12 +57,24 @@ public class ReviewResponse {
         return this.authorId;
     }
 
+    public String getAuthorUsername() {
+        return this.authorUsername;
+    }
+
     public String getText() {
         return this.text;
     }
 
     public Long getMediaItemId() {
         return this.mediaItemId;
+    }
+
+    public String getMediaTitle() {
+        return mediaTitle;
+    }
+
+    public String getMediaPosterUrl() {
+        return mediaPosterUrl;
     }
 
     public LocalDateTime getCreatedAt() {

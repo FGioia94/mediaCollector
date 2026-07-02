@@ -1063,6 +1063,37 @@ fieldset {
   box-shadow: var(--shadow-sm);
 }
 
+.review-head {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 0.72rem;
+  align-items: start;
+  margin-bottom: 0.52rem;
+}
+
+.review-poster {
+  width: 64px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #dcc7a7;
+  background: #efe4d2;
+}
+
+.review-poster.placeholder {
+  display: grid;
+  place-items: center;
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+
+.review-head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .details-header {
   display: grid;
   grid-template-columns: 240px 1fr;

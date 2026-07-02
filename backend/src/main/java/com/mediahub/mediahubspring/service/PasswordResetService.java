@@ -25,7 +25,7 @@ public class PasswordResetService {
     private final UserService userService;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    @Value("${app.frontend-base-url:http://localhost:5173}")
+    @Value("${app.frontend-base-url:https://mediahub.francescogioia.it}")
     private String frontendBaseUrl;
 
     @Value("${app.password-reset.expiration-minutes:30}")
@@ -60,7 +60,7 @@ public class PasswordResetService {
         token.setExpiresAt(LocalDateTime.now().plusMinutes(expirationMinutes));
         PasswordResetToken saved = tokenRepository.save(token);
 
-        String resetLink = frontendBaseUrl + "/reset-password?token=" + saved.getToken();
+        String resetLink = buildResetLink(saved.getToken());
         boolean sent = mailService.sendPasswordResetEmail(user.getEmail(), resetLink);
         return sent ? null : resetLink;
     }
@@ -86,5 +86,13 @@ public class PasswordResetService {
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private String buildResetLink(String token) {
+        String base = frontendBaseUrl == null ? "" : frontendBaseUrl.trim();
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        return base + "/reset-password?token=" + token;
     }
 }

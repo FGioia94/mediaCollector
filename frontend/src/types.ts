@@ -120,8 +120,11 @@ export interface TVShowRequest {
 export interface ReviewResponse {
   id: number;
   authorId: number;
+  authorUsername?: string;
   text: string;
   mediaItemId: number;
+  mediaTitle?: string;
+  mediaPosterUrl?: string;
   createdAt: string;
   rating: number;
 }

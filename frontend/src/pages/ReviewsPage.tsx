@@ -88,10 +88,27 @@ export function ReviewsPage() {
                 </div>
               ) : (
                 <>
-                  <strong>Rating {review.rating}/10</strong> · author#{
-                    review.authorId
-                  }{" "}
-                  · <MediaHoverLink mediaId={review.mediaItemId}>media #{review.mediaItemId}</MediaHoverLink>
+                  <div className="review-head">
+                    {review.mediaPosterUrl ? (
+                      <img
+                        src={review.mediaPosterUrl}
+                        alt={review.mediaTitle || `Media #${review.mediaItemId}`}
+                        className="review-poster"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="review-poster placeholder">No image</div>
+                    )}
+                    <div className="review-head-meta">
+                      <strong>Rating {review.rating}/10</strong>
+                      <span className="muted">
+                        {review.authorUsername || `author#${review.authorId}`}
+                      </span>
+                      <MediaHoverLink mediaId={review.mediaItemId}>
+                        {review.mediaTitle || `media #${review.mediaItemId}`}
+                      </MediaHoverLink>
+                    </div>
+                  </div>
                   <p>{review.text}</p>
                   <small>{new Date(review.createdAt).toLocaleString()}</small>
                   {isAuthenticated && (
