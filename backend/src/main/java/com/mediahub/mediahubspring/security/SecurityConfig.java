@@ -88,90 +88,90 @@ public class SecurityConfig {
                         // ---------------------------------------------------------
                         .requestMatchers(HttpMethod.GET, "/api/ping", "/api/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
 
                         // Media search and discovery
-                        .requestMatchers(HttpMethod.GET, "/media/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/media/**", "/api/media/**").permitAll()
 
                         // Movies & TV Shows - read only
-                        .requestMatchers(HttpMethod.GET, "/movies/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/tvshows/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movies/**", "/api/movies/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tvshows/**", "/api/tvshows/**").permitAll()
 
                         // Genres - read only
-                        .requestMatchers(HttpMethod.GET, "/genres/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/genres/**", "/api/genres/**").permitAll()
 
                         // Reviews - read only
-                        .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/reviews/**", "/api/reviews/**").permitAll()
 
                         // GraphQL endpoint
-                        .requestMatchers("/graphql").permitAll()
+                        .requestMatchers("/graphql", "/api/graphql").permitAll()
 
                         // Watchlist - read only
-                        .requestMatchers(HttpMethod.GET, "/watchlist/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/watchlist/**", "/api/watchlist/**").permitAll()
 
                         // External movies - read only
-                        .requestMatchers(HttpMethod.GET, "/external/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/external/**", "/api/external/**").permitAll()
 
                         // ---------------------------------------------------------
                         // USER ENDPOINTS (authenticated users)
                         // ---------------------------------------------------------
 
                         // Authenticated users can create reviews
-                        .requestMatchers(HttpMethod.POST, "/reviews").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/reviews", "/api/reviews").authenticated()
 
                         // Authenticated users can update reviews (domain checks still apply)
-                        .requestMatchers(HttpMethod.PUT, "/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/reviews/**", "/api/reviews/**").authenticated()
 
                         // Authenticated users can manage watchlist
-                        .requestMatchers(HttpMethod.POST, "/watchlist").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/watchlist", "/api/watchlist").authenticated()
 
-                        .requestMatchers(HttpMethod.DELETE, "/watchlist/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/watchlist/**", "/api/watchlist/**").authenticated()
 
                         // Authenticated user self profile endpoints
-                        .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/users/me/profile-image").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/users/me/profile-image/").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/profile/me").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/profile/me/image").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/profile/me/image/").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/profile/me/password").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/users/me", "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/users/me/profile-image", "/api/users/me/profile-image").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/users/me/profile-image/", "/api/users/me/profile-image/").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/profile/me", "/api/profile/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/profile/me/image", "/api/profile/me/image").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/profile/me/image/", "/api/profile/me/image/").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/profile/me/password", "/api/profile/me/password").authenticated()
 
                         // ---------------------------------------------------------
                         // EDITOR + ADMIN ENDPOINTS (content management)
                         // ---------------------------------------------------------
 
                         // Movies
-                        .requestMatchers(HttpMethod.POST, "/movies").hasAnyRole("EDITOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/movies/**").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/movies", "/api/movies").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/movies/**", "/api/movies/**").hasAnyRole("EDITOR", "ADMIN")
 
                         // External movies (save TMDB → DB)
-                        .requestMatchers(HttpMethod.POST, "/external/movie/**").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/external/movie/**", "/api/external/movie/**").hasAnyRole("EDITOR", "ADMIN")
 
                         // TV Shows
-                        .requestMatchers(HttpMethod.POST, "/tvshows").hasAnyRole("EDITOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/tvshows/**").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/tvshows", "/api/tvshows").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/tvshows/**", "/api/tvshows/**").hasAnyRole("EDITOR", "ADMIN")
 
                         // Genres
-                        .requestMatchers(HttpMethod.POST, "/genres").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/genres/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/genres/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/genres", "/api/genres").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/genres/**", "/api/genres/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/genres/**", "/api/genres/**").hasRole("ADMIN")
 
                         // ---------------------------------------------------------
                         // ADMIN ONLY ENDPOINTS (system-level operations)
                         // ---------------------------------------------------------
 
                         // Movies & TV Shows deletion
-                        .requestMatchers(HttpMethod.DELETE, "/movies/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/tvshows/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/movies/**", "/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/tvshows/**", "/api/tvshows/**").hasRole("ADMIN")
 
                         // Reviews deletion (moderation)
-                        .requestMatchers(HttpMethod.DELETE, "/reviews/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/reviews/**", "/api/reviews/**").hasRole("ADMIN")
 
                         // User management
-                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/users/**", "/api/users/**").hasRole("ADMIN")
 
                         // Role management
-                        .requestMatchers("/roles/**").hasRole("ADMIN")
+                        .requestMatchers("/roles/**", "/api/roles/**").hasRole("ADMIN")
 
                         // ---------------------------------------------------------
                         // ANY OTHER REQUEST MUST BE AUTHENTICATED
