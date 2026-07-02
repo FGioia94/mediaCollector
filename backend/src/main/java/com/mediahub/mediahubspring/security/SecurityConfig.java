@@ -58,7 +58,11 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
             "http://localhost:*",
-            "http://127.0.0.1:*"
+            "http://127.0.0.1:*",
+            "https://mediahub.francescogioia.it",
+            "https://www.mediahub.francescogioia.it",
+            "http://mediahub.francescogioia.it",
+            "http://www.mediahub.francescogioia.it"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
