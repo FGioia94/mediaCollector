@@ -12,7 +12,7 @@ import {
 import type { ReviewResponse } from "../types";
 
 export function ReviewsPage() {
-  const { isAuthenticated, userId } = useAuth();
+  const { isAuthenticated, isAdmin, userId } = useAuth();
   const [items, setItems] = useState<ReviewResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
@@ -88,31 +88,53 @@ export function ReviewsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="review-head">
-                    {review.mediaPosterUrl ? (
-                      <img
-                        src={review.mediaPosterUrl}
-                        alt={review.mediaTitle || `Media #${review.mediaItemId}`}
-                        className="review-poster"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="review-poster placeholder">No image</div>
-                    )}
-                    <div className="review-head-meta">
-                      <strong>Rating {review.rating}/10</strong>
-                      <span className="muted">
-                        {review.authorUsername || `author#${review.authorId}`}
-                      </span>
-                      <MediaHoverLink mediaId={review.mediaItemId}>
-                        {review.mediaTitle || `media #${review.mediaItemId}`}
-                      </MediaHoverLink>
+                  <div className="review-card-top">
+                    <div className="review-author-avatar-wrap">
+                      {review.authorProfileImage ? (
+                        <img
+                          src={review.authorProfileImage}
+                          alt={review.authorUsername || `author#${review.authorId}`}
+                          className="review-author-avatar"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="review-author-avatar placeholder" aria-hidden="true">
+                          {(review.authorUsername || "U").slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="review-head">
+                      {review.mediaPosterUrl ? (
+                        <img
+                          src={review.mediaPosterUrl}
+                          alt={review.mediaTitle || `Media #${review.mediaItemId}`}
+                          className="review-poster"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="review-poster placeholder">No image</div>
+                      )}
+                      <div className="review-head-meta">
+                        <div className="review-rating">
+                          <strong>Rating {review.rating}/10</strong>
+                        </div>
+                        <span className="muted review-author-name">
+                          {review.authorUsername || `author#${review.authorId}`}
+                        </span>
+                        <MediaHoverLink mediaId={review.mediaItemId}>
+                          {review.mediaTitle || `media #${review.mediaItemId}`}
+                        </MediaHoverLink>
+                      </div>
                     </div>
                   </div>
-                  <p>{review.text}</p>
-                  <small>{new Date(review.createdAt).toLocaleString()}</small>
+
+                  <p className="review-body">{review.text}</p>
+
+                  <div className="review-footer">
+                    <small>{new Date(review.createdAt).toLocaleString()}</small>
                   {isAuthenticated && (
-                    <div className="row-actions">
+                    <div className="row-actions review-actions">
                       {userId === review.authorId && (
                         <button
                           type="button"
@@ -125,14 +147,17 @@ export function ReviewsPage() {
                           Edit
                         </button>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(review.id)}
-                      >
-                        Delete
-                      </button>
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(review.id)}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   )}
+                  </div>
                 </>
               )}
             </li>

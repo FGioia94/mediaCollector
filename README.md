@@ -146,6 +146,99 @@ npm run build
 npm run lint
 ```
 
+## Simple CI/CD
+
+This repo includes a lightweight CI/CD setup based on GitHub Actions.
+
+What happens on push to `main`:
+- backend compile runs in CI
+- frontend production build runs in CI
+- Docker images for backend and frontend are built and pushed to GHCR
+- the server is reached via SSH
+- Docker Compose pulls the new images and redeploys the stack
+
+Files:
+- `.github/workflows/ci-cd.yml`
+- `deploy/docker-compose.prod.yml`
+- `deploy/redeploy.sh`
+- `deploy/.env.prod.example`
+
+Why this is a good portfolio-level setup:
+- no Jenkins or self-hosted CI maintenance
+- clear build pipeline with separate validation and deploy stages
+- production-like container deployment flow
+- simple enough to explain in an interview in 2 minutes
+
+### Required GitHub Secrets
+
+Deployment access:
+- `DEPLOY_HOST`
+- `DEPLOY_PORT`
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `DEPLOY_PATH`
+
+GHCR pull on the server:
+- `GHCR_USERNAME`
+- `GHCR_READ_TOKEN`
+
+Backend runtime configuration:
+- `BACKEND_PORT`
+- `FRONTEND_PORT`
+- `MEDIAHUB_NETWORK`
+- `MEDIAHUB_DB_URL`
+- `MEDIAHUB_DB_USERNAME`
+- `MEDIAHUB_DB_PASSWORD`
+- `JWT_PASSWORD`
+- `TMDB_API_KEY`
+- `OMDB_API_KEY`
+- `MEDIAHUB_ADMIN_EMAIL`
+- `MEDIAHUB_ADMIN_PASSWORD`
+- `MEDIAHUB_FRONTEND_BASE_URL`
+
+Optional mail/runtime settings:
+- `MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES`
+- `MEDIAHUB_SMTP_HOST`
+- `MEDIAHUB_SMTP_PORT`
+- `MEDIAHUB_SMTP_USERNAME`
+- `MEDIAHUB_SMTP_PASSWORD`
+- `MEDIAHUB_SMTP_AUTH`
+- `MEDIAHUB_SMTP_STARTTLS`
+
+### Server Prerequisites
+
+The target server should already have:
+- Docker installed
+- Docker Compose plugin installed
+- a shared Docker network such as `mediahub-net`
+- reverse proxy rules pointing to the frontend container port
+
+### Minimal IaC Angle
+
+If you want a simple DevOps/IaC story for a junior portfolio, use this setup:
+- GitHub Actions for CI/CD
+- Docker Compose for runtime infrastructure definition
+- one bootstrap script for first server setup
+
+Bootstrap script:
+- `deploy/bootstrap-server.sh`
+
+What it does:
+- installs Docker Engine + Docker Compose plugin on Ubuntu
+- creates the deploy directory
+- creates the shared Docker network used by the stack
+
+Example first-run setup on a fresh server:
+
+```bash
+sudo bash deploy/bootstrap-server.sh /opt/media-collector mediahub-net
+```
+
+Why this works well in interviews:
+- easy to explain end-to-end
+- shows repeatable server setup instead of manual clicking
+- avoids overengineering with Kubernetes/Jenkins/Terraform before they are needed
+
 ## API and Documentation
 
 - Detailed backend endpoint reference: backend/README.md

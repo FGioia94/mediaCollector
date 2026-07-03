@@ -86,6 +86,7 @@ public class ReviewController {
                 review.getId(),
                 review.getAuthor().getId(),
                 review.getAuthor().getUsernameValue(),
+            review.getAuthor().getProfileImage(),
                 review.getText(),
                 review.getMediaItem().getId(),
                 review.getMediaItem().getTitle(),

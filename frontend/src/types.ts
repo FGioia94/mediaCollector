@@ -126,6 +126,7 @@ export interface ReviewResponse {
   id: number;
   authorId: number;
   authorUsername?: string;
+  authorProfileImage?: string;
   text: string;
   mediaItemId: number;
   mediaTitle?: string;

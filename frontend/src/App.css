@@ -1063,6 +1063,34 @@ fieldset {
   box-shadow: var(--shadow-sm);
 }
 
+.review-card-top {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.review-author-avatar-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.review-author-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #d8c2a3;
+  background: #f0e2cf;
+}
+
+.review-author-avatar.placeholder {
+  display: grid;
+  place-items: center;
+  color: #5f5444;
+  font-weight: 700;
+}
+
 .review-head {
   display: grid;
   grid-template-columns: 64px 1fr;
@@ -1092,6 +1120,34 @@ fieldset {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
+}
+
+.review-rating {
+  padding: 0.16rem 0.52rem;
+  border-radius: 999px;
+  border: 1px solid #d8c3a4;
+  background: #f8ecdb;
+}
+
+.review-author-name {
+  font-weight: 600;
+}
+
+.review-body {
+  margin: 0.66rem 0 0.76rem;
+  line-height: 1.5;
+}
+
+.review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.review-actions {
+  margin-top: 0;
 }
 
 .details-header {

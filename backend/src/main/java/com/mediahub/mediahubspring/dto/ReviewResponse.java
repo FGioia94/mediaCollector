@@ -11,6 +11,7 @@ public class ReviewResponse {
     private Long id;
     private Long authorId;
     private String authorUsername;
+    private String authorProfileImage;
 
     @NotBlank
     private String text;
@@ -29,6 +30,7 @@ public class ReviewResponse {
     public ReviewResponse(Long id,
                           Long authorId,
                           String authorUsername,
+                          String authorProfileImage,
                           String text,
                           Long mediaItemId,
                           String mediaTitle,
@@ -38,6 +40,7 @@ public class ReviewResponse {
         this.id = id;
         this.authorId = authorId;
         this.authorUsername = authorUsername;
+        this.authorProfileImage = authorProfileImage;
         this.text = text;
         this.mediaItemId = mediaItemId;
         this.mediaTitle = mediaTitle;
@@ -59,6 +62,10 @@ public class ReviewResponse {
 
     public String getAuthorUsername() {
         return this.authorUsername;
+    }
+
+    public String getAuthorProfileImage() {
+        return this.authorProfileImage;
     }
 
     public String getText() {
