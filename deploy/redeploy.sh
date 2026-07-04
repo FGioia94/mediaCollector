@@ -10,6 +10,14 @@ BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT:-8080}/api/health"
 echo "Pulling fresh images..."
 $COMPOSE pull
 
+echo "Cleaning up conflicting legacy containers (if any)..."
+for name in mediahub-backend mediahub-frontend; do
+  if docker ps -a --format '{{.Names}}' | grep -Fxq "$name"; then
+    docker rm -f "$name" > /dev/null || true
+    echo "Removed stale container: $name"
+  fi
+done
+
 echo "Restarting stack..."
 $COMPOSE up -d --remove-orphans
 
