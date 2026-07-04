@@ -4,7 +4,21 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-COMPOSE="docker compose --env-file .env.prod -f docker-compose.prod.yml"
+if [ ! -f .env.deploy ]; then
+  echo "Missing .env.deploy in $SCRIPT_DIR"
+  exit 1
+fi
+
+if [ ! -f .env.prod ]; then
+  echo "Missing .env.prod runtime file in $SCRIPT_DIR"
+  exit 1
+fi
+
+set -a
+source .env.deploy
+set +a
+
+COMPOSE="docker compose --env-file .env.deploy -f docker-compose.prod.yml"
 BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT:-8080}/api/health"
 
 echo "Pulling fresh images..."

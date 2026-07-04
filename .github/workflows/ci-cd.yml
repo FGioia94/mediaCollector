@@ -168,30 +168,17 @@ jobs:
           script: |
             set -eu
             cd "${{ env.DEPLOY_PATH }}"
-            cat > .env.prod <<'EOF'
+            cat > .env.deploy <<'EOF'
             REGISTRY_OWNER=${{ needs.build-images.outputs.registry_owner }}
             IMAGE_TAG=${{ github.sha }}
             BACKEND_PORT=${{ secrets.BACKEND_PORT }}
             FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
             MEDIAHUB_NETWORK=${{ secrets.MEDIAHUB_NETWORK }}
-            MEDIAHUB_DB_URL=${{ secrets.MEDIAHUB_DB_URL }}
-            MEDIAHUB_DB_USERNAME=${{ secrets.MEDIAHUB_DB_USERNAME }}
-            MEDIAHUB_DB_PASSWORD=${{ secrets.MEDIAHUB_DB_PASSWORD }}
-            JWT_PASSWORD=${{ secrets.JWT_PASSWORD }}
-            TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
-            OMDB_API_KEY=${{ secrets.OMDB_API_KEY }}
-            MEDIAHUB_ADMIN_EMAIL=${{ secrets.MEDIAHUB_ADMIN_EMAIL }}
-            MEDIAHUB_ADMIN_PASSWORD=${{ secrets.MEDIAHUB_ADMIN_PASSWORD }}
-            MEDIAHUB_ADMIN_SYNC_PASSWORD_ON_STARTUP=false
-            MEDIAHUB_FRONTEND_BASE_URL=${{ secrets.MEDIAHUB_FRONTEND_BASE_URL }}
-            MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES=${{ secrets.MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES }}
-            MEDIAHUB_SMTP_HOST=${{ secrets.MEDIAHUB_SMTP_HOST }}
-            MEDIAHUB_SMTP_PORT=${{ secrets.MEDIAHUB_SMTP_PORT }}
-            MEDIAHUB_SMTP_USERNAME=${{ secrets.MEDIAHUB_SMTP_USERNAME }}
-            MEDIAHUB_SMTP_PASSWORD=${{ secrets.MEDIAHUB_SMTP_PASSWORD }}
-            MEDIAHUB_SMTP_AUTH=${{ secrets.MEDIAHUB_SMTP_AUTH }}
-            MEDIAHUB_SMTP_STARTTLS=${{ secrets.MEDIAHUB_SMTP_STARTTLS }}
             EOF
+            if [ ! -f .env.prod ]; then
+              echo "Missing .env.prod on server at ${{ env.DEPLOY_PATH }}. Keep your runtime env there and rerun."
+              exit 1
+            fi
             echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             chmod +x redeploy.sh
             ./redeploy.sh
