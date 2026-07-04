@@ -22,7 +22,7 @@ echo "Restarting stack..."
 $COMPOSE up -d --remove-orphans
 
 echo "Waiting for backend health..."
-for attempt in $(seq 1 20); do
+for attempt in $(seq 1 40); do
   if curl -fsS "$BACKEND_HEALTH_URL" > /dev/null; then
     echo "Health check passed."
     $COMPOSE ps
@@ -34,4 +34,10 @@ done
 
 echo "Health check failed after deploy."
 $COMPOSE ps
+echo "----- Backend logs (last 200 lines) -----"
+docker logs --tail 200 mediahub-backend || true
+echo "----- Frontend logs (last 80 lines) -----"
+docker logs --tail 80 mediahub-frontend || true
+echo "----- Backend container state -----"
+docker inspect mediahub-backend --format '{{json .State}}' || true
 exit 1
