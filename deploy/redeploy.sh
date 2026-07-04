@@ -14,6 +14,16 @@ if [ ! -f .env.prod ]; then
   exit 1
 fi
 
+RUNTIME_DB_URL="$(grep -E '^MEDIAHUB_DB_URL=' .env.prod | tail -n 1 | cut -d= -f2- || true)"
+if [ -z "$RUNTIME_DB_URL" ]; then
+  echo "Missing MEDIAHUB_DB_URL in .env.prod"
+  exit 1
+fi
+
+# Print runtime DB target (without credentials) to make deploy failures actionable.
+RUNTIME_DB_URL_SAFE="$(echo "$RUNTIME_DB_URL" | sed -E 's#(postgres(ql)?://)[^@/]+@#\1***@#')"
+echo "Runtime DB URL from .env.prod: $RUNTIME_DB_URL_SAFE"
+
 set -a
 source .env.deploy
 set +a
