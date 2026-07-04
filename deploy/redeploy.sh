@@ -20,9 +20,102 @@ if [ -z "$RUNTIME_DB_URL" ]; then
   exit 1
 fi
 
+RUNTIME_DB_URL_NO_JDBC="${RUNTIME_DB_URL#jdbc:}"
+RUNTIME_DB_NAME="${RUNTIME_DB_URL_NO_JDBC##*/}"
+RUNTIME_DB_NAME="${RUNTIME_DB_NAME%%\?*}"
+if [ -z "$RUNTIME_DB_NAME" ] || [ "$RUNTIME_DB_NAME" = "$RUNTIME_DB_URL_NO_JDBC" ]; then
+  echo "Cannot parse database name from MEDIAHUB_DB_URL"
+  exit 1
+fi
+
+RUNTIME_DB_AUTHORITY_PATH="${RUNTIME_DB_URL_NO_JDBC#postgresql://}"
+RUNTIME_DB_AUTHORITY="${RUNTIME_DB_AUTHORITY_PATH%%/*}"
+RUNTIME_DB_CREDENTIALS=""
+RUNTIME_DB_HOST_PORT="$RUNTIME_DB_AUTHORITY"
+if echo "$RUNTIME_DB_AUTHORITY" | grep -q '@'; then
+  RUNTIME_DB_CREDENTIALS="${RUNTIME_DB_AUTHORITY%@*}"
+  RUNTIME_DB_HOST_PORT="${RUNTIME_DB_AUTHORITY##*@}"
+fi
+
+RUNTIME_DB_URL_USER=""
+RUNTIME_DB_URL_PASSWORD=""
+if [ -n "$RUNTIME_DB_CREDENTIALS" ]; then
+  RUNTIME_DB_URL_USER="${RUNTIME_DB_CREDENTIALS%%:*}"
+  if [ "$RUNTIME_DB_URL_USER" != "$RUNTIME_DB_CREDENTIALS" ]; then
+    RUNTIME_DB_URL_PASSWORD="${RUNTIME_DB_CREDENTIALS#*:}"
+  fi
+fi
+
+RUNTIME_DB_HOST="${RUNTIME_DB_HOST_PORT%%:*}"
+RUNTIME_DB_PORT="${RUNTIME_DB_HOST_PORT##*:}"
+if [ -z "$RUNTIME_DB_HOST" ] || [ "$RUNTIME_DB_HOST" = "$RUNTIME_DB_HOST_PORT" ]; then
+  echo "Cannot parse database host from MEDIAHUB_DB_URL"
+  exit 1
+fi
+if [ "$RUNTIME_DB_PORT" = "$RUNTIME_DB_HOST_PORT" ]; then
+  RUNTIME_DB_PORT="5432"
+fi
+
+RUNTIME_DB_APP_USER="$(grep -E '^MEDIAHUB_DB_USERNAME=' .env.prod | tail -n 1 | cut -d= -f2- || true)"
+RUNTIME_DB_APP_PASSWORD="$(grep -E '^MEDIAHUB_DB_PASSWORD=' .env.prod | tail -n 1 | cut -d= -f2- || true)"
+if [ -z "$RUNTIME_DB_APP_USER" ]; then
+  echo "Missing MEDIAHUB_DB_USERNAME in .env.prod"
+  exit 1
+fi
+if [ -z "$RUNTIME_DB_APP_PASSWORD" ]; then
+  echo "Missing MEDIAHUB_DB_PASSWORD in .env.prod"
+  exit 1
+fi
+
 # Print runtime DB target (without credentials) to make deploy failures actionable.
 RUNTIME_DB_URL_SAFE="$(echo "$RUNTIME_DB_URL" | sed -E 's#(postgres(ql)?://)[^@/]+@#\1***@#')"
 echo "Runtime DB URL from .env.prod: $RUNTIME_DB_URL_SAFE"
+echo "Runtime DB name from .env.prod: $RUNTIME_DB_NAME"
+echo "Runtime DB host/port from .env.prod: ${RUNTIME_DB_HOST}:${RUNTIME_DB_PORT}"
+
+ensure_database_exists() {
+  local db_name="$1"
+  local pg_container="mediahub-postgres"
+
+  if ! docker ps -a --format '{{.Names}}' | grep -Fxq "$pg_container"; then
+    echo "Postgres container '$pg_container' not found; cannot run DB preflight."
+    return 1
+  fi
+
+  local admin_user="$RUNTIME_DB_APP_USER"
+  local admin_password="$RUNTIME_DB_APP_PASSWORD"
+
+  echo "Using postgres user '$admin_user' for DB preflight."
+
+  psql_exec() {
+    local sql="$1"
+    if [ -n "$admin_password" ]; then
+      docker exec -e PGPASSWORD="$admin_password" "$pg_container" \
+        psql -h "$RUNTIME_DB_HOST" -p "$RUNTIME_DB_PORT" -U "$admin_user" -d postgres -v ON_ERROR_STOP=1 -tAc "$sql"
+    else
+      docker exec "$pg_container" \
+        psql -h "$RUNTIME_DB_HOST" -p "$RUNTIME_DB_PORT" -U "$admin_user" -d postgres -v ON_ERROR_STOP=1 -tAc "$sql"
+    fi
+  }
+
+  if psql_exec "SELECT 1 FROM pg_database WHERE datname='${db_name}';" | grep -qx '1'; then
+    echo "Database '$db_name' already exists in '$pg_container'."
+    return 0
+  fi
+
+  echo "Database '$db_name' not found in '$pg_container'. Attempting create with user '$admin_user'..."
+  if psql_exec "CREATE DATABASE \"${db_name}\";" > /dev/null; then
+    echo "Database '$db_name' created successfully."
+  else
+    echo "Could not auto-create '$db_name'. Check postgres credentials/privileges."
+    return 1
+  fi
+}
+
+if ! ensure_database_exists "$RUNTIME_DB_NAME"; then
+  echo "DB preflight failed. Aborting deploy before restarting containers."
+  exit 1
+fi
 
 set -a
 source .env.deploy
