@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
@@ -6,6 +6,7 @@ import * as external from "../api/external";
 import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
 import { ExternalHoverCardWrap } from "../components/ExternalHoverCardWrap";
+import { ListControls } from "../components/ListControls";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -74,7 +75,42 @@ export function ExternalSearchPage() {
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"title" | "releaseDate" | "externalId">("title");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [pageSize, setPageSize] = useState(12);
+  const [page, setPage] = useState(1);
   const autocompleteRequestId = useRef(0);
+
+  const sortedResults = useMemo(() => {
+    const baseResults = results?.results ?? [];
+    const copy = [...baseResults];
+
+    copy.sort((left, right) => {
+      const direction = sortDir === "asc" ? 1 : -1;
+
+      if (sortBy === "externalId") {
+        return (left.id - right.id) * direction;
+      }
+
+      if (sortBy === "releaseDate") {
+        const leftTime = Date.parse(left.releaseDate ?? left.release_date ?? "");
+        const rightTime = Date.parse(right.releaseDate ?? right.release_date ?? "");
+        return ((Number.isNaN(leftTime) ? 0 : leftTime) - (Number.isNaN(rightTime) ? 0 : rightTime)) * direction;
+      }
+
+      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" }) * direction;
+    });
+
+    return copy;
+  }, [results, sortBy, sortDir]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, sortDir, pageSize, results]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedResults.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedResults = sortedResults.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const hydrateImportedState = async (searchResults: TmdbSearchResponse["results"]) => {
     if (!isAuthenticated || searchResults.length === 0) {
@@ -278,8 +314,34 @@ export function ExternalSearchPage() {
         <EmptyMsg>No matches.</EmptyMsg>
       )}
       {results && results.results.length > 0 && (
-        <div className="media-grid">
-          {results.results.map((item) => {
+        <>
+          <ListControls
+            sortBy={sortBy}
+            sortDir={sortDir}
+            sortOptions={[
+              { value: "title", label: "Title" },
+              { value: "releaseDate", label: "Release date" },
+              { value: "externalId", label: "TMDB ID" },
+            ]}
+            onSortByChange={(value) => {
+              if (value === "releaseDate" || value === "externalId") {
+                setSortBy(value);
+              } else {
+                setSortBy("title");
+              }
+            }}
+            onSortDirChange={setSortDir}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedResults.length}
+            visibleItems={paginatedResults.length}
+            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
+            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+          />
+          <div className="media-grid">
+          {paginatedResults.map((item) => {
             const importedLocalId = importedLocalIds[item.id];
             const cardActions = (
               <>
@@ -331,7 +393,8 @@ export function ExternalSearchPage() {
               </ExternalHoverCardWrap>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </section>
   );

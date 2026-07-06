@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
+import { ListControls } from "../components/ListControls";
 import { MediaCardHoverWrap } from "../components/MediaCardHoverWrap";
 import {
   EmptyMsg,
@@ -17,6 +18,10 @@ export function MoviesPage() {
   const [items, setItems] = useState<MovieResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"title" | "releaseDate" | "duration">("title");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [pageSize, setPageSize] = useState(12);
+  const [page, setPage] = useState(1);
 
   const load = () => {
     movies
@@ -26,6 +31,37 @@ export function MoviesPage() {
   };
 
   useEffect(load, []);
+
+  const sortedItems = useMemo(() => {
+    if (!items) return [];
+
+    const copy = [...items];
+    copy.sort((left, right) => {
+      const direction = sortDir === "asc" ? 1 : -1;
+
+      if (sortBy === "duration") {
+        return (left.duration - right.duration) * direction;
+      }
+
+      if (sortBy === "releaseDate") {
+        const leftTime = left.releaseDate ? Date.parse(left.releaseDate) : 0;
+        const rightTime = right.releaseDate ? Date.parse(right.releaseDate) : 0;
+        return (leftTime - rightTime) * direction;
+      }
+
+      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" }) * direction;
+    });
+
+    return copy;
+  }, [items, sortBy, sortDir]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, sortDir, pageSize, items]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this movie? (editor/admin only)")) return;
@@ -53,8 +89,34 @@ export function MoviesPage() {
       {items === null && !error && <SkeletonCardGrid count={8} />}
       {items && items.length === 0 && <EmptyMsg>No movies yet.</EmptyMsg>}
       {items && items.length > 0 && (
-        <div className="media-grid">
-          {items.map((movie) => {
+        <>
+          <ListControls
+            sortBy={sortBy}
+            sortDir={sortDir}
+            sortOptions={[
+              { value: "title", label: "Title" },
+              { value: "releaseDate", label: "Release date" },
+              { value: "duration", label: "Duration" },
+            ]}
+            onSortByChange={(value) => {
+              if (value === "releaseDate" || value === "duration") {
+                setSortBy(value);
+              } else {
+                setSortBy("title");
+              }
+            }}
+            onSortDirChange={setSortDir}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedItems.length}
+            visibleItems={paginatedItems.length}
+            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
+            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+          />
+          <div className="media-grid">
+          {paginatedItems.map((movie) => {
             const cardActions = (
               <>
                 <Link to={`/media/${movie.id}`} className="button-link ghost">
@@ -106,7 +168,8 @@ export function MoviesPage() {
               </MediaCardHoverWrap>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </section>
   );

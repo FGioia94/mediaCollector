@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
 import { useAuth } from "../auth/AuthContext";
 import { ExternalHoverCardWrap } from "../components/ExternalHoverCardWrap";
+import { ListControls } from "../components/ListControls";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -18,6 +19,10 @@ export function TrendingPage() {
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"title" | "savedLocally" | "externalId">("title");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [pageSize, setPageSize] = useState(12);
+  const [page, setPage] = useState(1);
 
   const load = () => {
     external
@@ -27,6 +32,35 @@ export function TrendingPage() {
   };
 
   useEffect(load, []);
+
+  const sortedItems = useMemo(() => {
+    if (!items) return [];
+
+    const copy = [...items];
+    copy.sort((left, right) => {
+      const direction = sortDir === "asc" ? 1 : -1;
+
+      if (sortBy === "savedLocally") {
+        return (Number(left.savedLocally) - Number(right.savedLocally)) * direction;
+      }
+
+      if (sortBy === "externalId") {
+        return (left.externalId - right.externalId) * direction;
+      }
+
+      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" }) * direction;
+    });
+
+    return copy;
+  }, [items, sortBy, sortDir]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, sortDir, pageSize, items]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleSave = async (id: number) => {
     setSavingId(id);
@@ -50,8 +84,34 @@ export function TrendingPage() {
       {items === null && !error && <SkeletonCardGrid count={8} />}
       {items && items.length === 0 && <EmptyMsg>No trending data.</EmptyMsg>}
       {items && items.length > 0 && (
-        <div className="media-grid">
-          {items.map((item) => {
+        <>
+          <ListControls
+            sortBy={sortBy}
+            sortDir={sortDir}
+            sortOptions={[
+              { value: "title", label: "Title" },
+              { value: "savedLocally", label: "Imported status" },
+              { value: "externalId", label: "TMDB ID" },
+            ]}
+            onSortByChange={(value) => {
+              if (value === "savedLocally" || value === "externalId") {
+                setSortBy(value);
+              } else {
+                setSortBy("title");
+              }
+            }}
+            onSortDirChange={setSortDir}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedItems.length}
+            visibleItems={paginatedItems.length}
+            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
+            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+          />
+          <div className="media-grid">
+          {paginatedItems.map((item) => {
             const cardActions = (
               <>
                 <Link to={`/external/movie/${item.externalId}`} className="button-link ghost">
@@ -100,7 +160,8 @@ export function TrendingPage() {
               </ExternalHoverCardWrap>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </section>
   );
