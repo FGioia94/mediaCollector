@@ -17,11 +17,13 @@ export function ExternalSearchPage() {
   const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TmdbSearchResponse | null>(null);
+  const [importedLocalIds, setImportedLocalIds] = useState<Record<number, number>>({});
   const [suggestions, setSuggestions] = useState<TmdbSearchResponse["results"]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [savingId, setSavingId] = useState<number | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
   const autocompleteRequestId = useRef(0);
 
@@ -100,11 +102,18 @@ export function ExternalSearchPage() {
 
   const handleSave = async (id: number) => {
     setActionMsg(null);
+    setSavingId(id);
     try {
       const saved = await external.saveExternalMovie(id);
+      setImportedLocalIds((prev) => ({
+        ...prev,
+        [id]: saved.id,
+      }));
       setActionMsg(`Saved as local movie #${saved.id}`);
     } catch (err) {
       setActionMsg(errorMessage(err));
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -206,14 +215,19 @@ export function ExternalSearchPage() {
       {results && results.results.length > 0 && (
         <div className="media-grid">
           {results.results.map((item) => {
+            const importedLocalId = importedLocalIds[item.id];
             const cardActions = (
               <>
                 <Link to={`/external/movie/${item.id}`} className="button-link ghost">
                   See more
                 </Link>
-                {isAuthenticated ? (
-                  <button type="button" onClick={() => handleSave(item.id)}>
-                    Import
+                {isAuthenticated ? importedLocalId ? (
+                  <Link to={`/media/${importedLocalId}`} className="button-link ghost">
+                    View local
+                  </Link>
+                ) : (
+                  <button type="button" onClick={() => handleSave(item.id)} disabled={savingId === item.id}>
+                    {savingId === item.id ? "Importing..." : "Import"}
                   </button>
                 ) : null}
               </>
