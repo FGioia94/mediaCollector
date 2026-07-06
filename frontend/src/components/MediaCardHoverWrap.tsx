@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+import * as external from "../api/external";
 import * as movies from "../api/movies";
 import * as tvshows from "../api/tvshows";
+import type { ExternalTrailerResponse, TmdbMovieSearchResult } from "../types";
 
 interface Preview {
   title: string;
@@ -19,6 +21,29 @@ interface MediaCardHoverWrapProps {
 }
 
 const previewCache = new Map<number, Preview | null>();
+const trailerCache = new Map<number, ExternalTrailerResponse | null>();
+
+function normalizeTitle(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function pickBestTmdbMatch(preview: Preview, results: TmdbMovieSearchResult[]): TmdbMovieSearchResult | null {
+  if (!results.length) return null;
+
+  const wantedTitle = normalizeTitle(preview.title);
+  const wantedYear = preview.releaseDate?.slice(0, 4);
+
+  const exactTitleMatch = results.find((result) => {
+    const resultTitle = normalizeTitle(result.title);
+    const resultDate = result.releaseDate ?? result.release_date;
+    const resultYear = resultDate?.slice(0, 4);
+    if (resultTitle !== wantedTitle) return false;
+    if (!wantedYear || !resultYear) return true;
+    return wantedYear === resultYear;
+  });
+
+  return exactTitleMatch ?? results[0] ?? null;
+}
 
 async function resolvePreview(mediaId: number): Promise<Preview | null> {
   if (previewCache.has(mediaId)) {
@@ -58,6 +83,7 @@ async function resolvePreview(mediaId: number): Promise<Preview | null> {
 export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHint }: MediaCardHoverWrapProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
   const [desktopHoverEnabled, setDesktopHoverEnabled] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(() => {
     if (previewHint?.title) {
@@ -70,8 +96,12 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
     }
     return previewCache.get(mediaId) ?? null;
   });
+  const [trailer, setTrailer] = useState<ExternalTrailerResponse | null>(() => {
+    return trailerCache.get(mediaId) ?? null;
+  });
 
   const requestRef = useRef(0);
+  const trailerRequestRef = useRef(0);
   const hoverDelayRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -108,6 +138,49 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
       cancelled = true;
     };
   }, [mediaId, open, preview]);
+
+  useEffect(() => {
+    if (!open || trailer || !preview?.title) return;
+
+    let cancelled = false;
+    const requestId = ++trailerRequestRef.current;
+    setLoadingTrailer(true);
+
+    external
+      .externalSearch(preview.title)
+      .then((search) => {
+        const match = pickBestTmdbMatch(preview, search.results ?? []);
+        if (!match) {
+          throw new Error("No TMDB match");
+        }
+        return external.externalTrailer(match.id);
+      })
+      .then((data) => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          trailerCache.set(mediaId, data);
+          setTrailer(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          trailerCache.set(mediaId, null);
+          setTrailer(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled && trailerRequestRef.current === requestId) {
+          setLoadingTrailer(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mediaId, open, preview, trailer]);
+
+  const trailerSrc = trailer?.embedUrl
+    ? `${trailer.embedUrl}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1`
+    : null;
 
   const isInteractiveTarget = (target: EventTarget | null): boolean => {
     if (!(target instanceof HTMLElement)) return false;
@@ -173,7 +246,16 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
             </>
           ) : preview ? (
             <>
-              {preview.posterUrl ? (
+              {trailerSrc ? (
+                <iframe
+                  src={trailerSrc}
+                  title={`${preview.title} trailer`}
+                  className="external-hover-video"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              ) : preview.posterUrl ? (
                 <img src={preview.posterUrl} alt={preview.title} className="media-card-hover-poster" loading="lazy" />
               ) : (
                 <span className="media-card-hover-poster placeholder">No image</span>
@@ -184,6 +266,7 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
                   {preview.kind}
                   {preview.releaseDate ? ` · ${preview.releaseDate.slice(0, 4)}` : ""}
                 </small>
+                {loadingTrailer ? <small className="muted">Loading trailer...</small> : null}
                 {popupActions && <span className="card-actions external-popup-actions">{popupActions}</span>}
               </span>
             </>
