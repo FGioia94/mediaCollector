@@ -3,11 +3,32 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 
+const THEME_STORAGE_KEY = "mediahub.theme";
+type ThemeMode = "light" | "dark";
+
 export function Navbar() {
   const { isAuthenticated, username, logout, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>("light");
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    const preferredDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const nextTheme: ThemeMode = stored === "dark" || stored === "light"
+      ? stored
+      : preferredDark
+        ? "dark"
+        : "light";
+
+    setTheme(nextTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -18,6 +39,10 @@ export function Navbar() {
     navigate("/login");
   };
 
+  const toggleTheme = () => {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-brand-wrap">
@@ -26,7 +51,6 @@ export function Navbar() {
         </div>
         <div className="navbar-brand">
           <NavLink to="/">MediaHub</NavLink>
-          <small>Cinematic Intelligence Workspace</small>
         </div>
       </div>
 
@@ -88,6 +112,9 @@ export function Navbar() {
         </ul>
 
         <div className="navbar-auth">
+        <button type="button" className="theme-toggle" onClick={toggleTheme}>
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
         {isAuthenticated ? (
           <>
             <span className="navbar-email">{username}</span>

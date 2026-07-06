@@ -45,12 +45,7 @@ export function HomePage() {
     <section className="home-page">
       <div className="home-hero">
         <div>
-          <p className="eyebrow">Media discovery platform</p>
           <h1>Build and curate your cinematic catalog with confidence.</h1>
-          <p className="home-hero-copy">
-            Explore trends, manage movies and TV shows, and keep review quality high
-            from a single professional workspace.
-          </p>
 
           <div className="home-hero-actions">
             <Link className="button-link" to="/discover">
