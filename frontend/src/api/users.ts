@@ -1,4 +1,4 @@
-import { HttpError, request } from "./client";
+import { HttpError, request, requestArray } from "./client";
 import type {
   ChangePasswordRequest,
   MessageResponse,
@@ -7,7 +7,8 @@ import type {
   UserResponse,
 } from "../types";
 
-export const listUsers = (): Promise<UserResponse[]> => request("/users/all");
+export const listUsers = (): Promise<UserResponse[]> =>
+  requestArray("/users/all", {}, "users list");
 
 export const getUser = (id: number): Promise<UserResponse> =>
   request(`/users/${id}`);

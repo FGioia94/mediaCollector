@@ -39,12 +39,25 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 function readInitial(): AuthState {
   const storedId = localStorage.getItem(USER_ID_KEY);
   const storedRoles = localStorage.getItem(ROLES_KEY);
+  let parsedRoles: string[] = [];
+
+  if (storedRoles) {
+    try {
+      const candidate = JSON.parse(storedRoles);
+      if (Array.isArray(candidate)) {
+        parsedRoles = candidate.filter((value): value is string => typeof value === "string");
+      }
+    } catch {
+      parsedRoles = [];
+    }
+  }
+
   return {
     token: getToken(),
     email: localStorage.getItem(EMAIL_KEY),
     username: localStorage.getItem(USERNAME_KEY),
     userId: storedId ? Number(storedId) : null,
-    roles: storedRoles ? (JSON.parse(storedRoles) as string[]) : [],
+    roles: parsedRoles,
   };
 }
 
@@ -79,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: response.email,
       username: response.username,
       userId: response.userId,
-      roles: response.roles,
+      roles: Array.isArray(response.roles) ? response.roles : [],
     }));
   }, []);
 
@@ -92,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: response.email,
       username: response.username,
       userId: response.userId,
-      roles: response.roles,
+      roles: Array.isArray(response.roles) ? response.roles : [],
     }));
   }, []);
 

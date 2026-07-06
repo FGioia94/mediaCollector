@@ -1,7 +1,8 @@
-import { request } from "./client";
+import { request, requestArray } from "./client";
 import type { MovieRequest, MovieResponse } from "../types";
 
-export const listMovies = (): Promise<MovieResponse[]> => request("/movies/all");
+export const listMovies = (): Promise<MovieResponse[]> =>
+  requestArray("/movies/all", {}, "movies list");
 
 export const getMovie = (id: number): Promise<MovieResponse> =>
   request(`/movies/${id}`);

@@ -1,7 +1,8 @@
-import { request } from "./client";
+import { request, requestArray } from "./client";
 import type { Genre } from "../types";
 
-export const listGenres = (): Promise<Genre[]> => request("/genres");
+export const listGenres = (): Promise<Genre[]> =>
+  requestArray("/genres", {}, "genres list");
 
 export const getGenre = (id: number): Promise<Genre> => request(`/genres/${id}`);
 

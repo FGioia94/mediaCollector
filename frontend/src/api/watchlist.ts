@@ -1,18 +1,19 @@
-import { request } from "./client";
+import { request, requestArray } from "./client";
 import type { WatchListRequest, WatchListResponse } from "../types";
 
 export const listWatchlist = (): Promise<WatchListResponse[]> =>
-  request("/watchlist/all");
+  requestArray("/watchlist/all", {}, "watchlist entries");
 
 export const getWatchlistEntry = (id: number): Promise<WatchListResponse> =>
   request(`/watchlist/${id}`);
 
 export const listByUser = (userId: number): Promise<WatchListResponse[]> =>
-  request(`/watchlist/user/${userId}`);
+  requestArray(`/watchlist/user/${userId}`, {}, "user watchlist");
 
 export const listByMediaItem = (
   mediaItemId: number,
-): Promise<WatchListResponse[]> => request(`/watchlist/media/${mediaItemId}`);
+): Promise<WatchListResponse[]> =>
+  requestArray(`/watchlist/media/${mediaItemId}`, {}, "media watchlist entries");
 
 export const watchlistExists = (
   userId: number,

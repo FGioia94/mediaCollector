@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { ensureArray, ensureObject, request, requestArray } from "./client";
 import type {
   EnrichedMediaDetails,
   ExternalTrailerResponse,
@@ -15,10 +15,16 @@ export const externalTrailer = (
 ): Promise<ExternalTrailerResponse | null> => request(`/external/movie/${id}/trailer`);
 
 export const externalSearch = (query: string): Promise<TmdbSearchResponse> =>
-  request("/external/search", { params: { query } });
+  request<unknown>("/external/search", { params: { query } }).then((payload) => {
+    const body = ensureObject<{ results?: unknown }>(payload, "external search");
+    return {
+      ...(body as object),
+      results: ensureArray<TmdbSearchResponse["results"][number]>(body.results, "external search results"),
+    } as TmdbSearchResponse;
+  });
 
 export const trending = (): Promise<TrendingMediaResponse[]> =>
-  request("/external/trending");
+  requestArray("/external/trending", {}, "external trending");
 
 export const saveExternalMovie = (id: number): Promise<MovieResponse> =>
   request(`/external/movie/${id}/save`, { method: "POST" });

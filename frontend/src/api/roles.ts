@@ -1,7 +1,8 @@
-import { request } from "./client";
+import { request, requestArray } from "./client";
 import type { Role } from "../types";
 
-export const listRoles = (): Promise<Role[]> => request("/roles/all");
+export const listRoles = (): Promise<Role[]> =>
+  requestArray("/roles/all", {}, "roles list");
 
 export const getRole = (id: number): Promise<Role> => request(`/roles/${id}`);
 

@@ -36,6 +36,26 @@ interface RequestOptions {
   auth?: boolean;
 }
 
+export function ensureArray<T>(payload: unknown, context: string): T[] {
+  if (Array.isArray(payload)) return payload as T[];
+  throw new Error(`Unexpected ${context} response format`);
+}
+
+export function ensureObject<T extends object>(payload: unknown, context: string): T {
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    return payload as T;
+  }
+  throw new Error(`Unexpected ${context} response format`);
+}
+
+export function requestArray<T>(
+  path: string,
+  options: RequestOptions = {},
+  context = path,
+): Promise<T[]> {
+  return request<unknown>(path, options).then((payload) => ensureArray<T>(payload, context));
+}
+
 function buildUrl(
   path: string,
   params?: RequestOptions["params"],
@@ -90,6 +110,9 @@ export async function request<T>(
     try {
       parsed = JSON.parse(text);
     } catch {
+      if (response.ok) {
+        throw new HttpError(response.status, "Unexpected non-JSON response", text);
+      }
       parsed = text;
     }
   }

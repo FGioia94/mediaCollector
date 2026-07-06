@@ -1,8 +1,8 @@
-import { request } from "./client";
+import { request, requestArray } from "./client";
 import type { TVShowRequest, TVShowResponse } from "../types";
 
 export const listTVShows = (): Promise<TVShowResponse[]> =>
-  request("/tvshows/all");
+  requestArray("/tvshows/all", {}, "tv shows list");
 
 export const getTVShow = (id: number): Promise<TVShowResponse> =>
   request(`/tvshows/${id}`);
