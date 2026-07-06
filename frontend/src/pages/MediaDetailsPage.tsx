@@ -190,9 +190,7 @@ export function MediaDetailsPage() {
           <ul className="reviews">
             {itemReviews.map((review) => (
               <li key={review.id}>
-                <strong>Rating {review.rating}/10</strong> · author#{
-                  review.authorId
-                }
+                <strong>Rating {review.rating}/10</strong> · {review.authorUsername || `author#${review.authorId}`}
                 <p>{review.text}</p>
                 <small>{new Date(review.createdAt).toLocaleString()}</small>
               </li>
