@@ -6,7 +6,12 @@ import type {
 } from "../types";
 
 export const listReviews = (): Promise<ReviewResponse[]> =>
-  request("/reviews/all");
+  request<unknown>("/reviews/all").then((payload) => {
+    if (Array.isArray(payload)) {
+      return payload as ReviewResponse[];
+    }
+    throw new Error("Unexpected reviews payload format");
+  });
 
 export const getReview = (id: number): Promise<ReviewResponse> =>
   request(`/reviews/${id}`);

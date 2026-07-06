@@ -23,7 +23,14 @@ export function ReviewsPage() {
   const load = () => {
     reviewsApi
       .listReviews()
-      .then(setItems)
+      .then((rows) => {
+        if (Array.isArray(rows)) {
+          setItems(rows);
+          return;
+        }
+        setItems([]);
+        setError("Unexpected reviews response format from server.");
+      })
       .catch((err) => setError(errorMessage(err)));
   };
 

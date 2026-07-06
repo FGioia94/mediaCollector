@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import * as external from "../api/external";
 import * as media from "../api/media";
 import { MediaCard } from "../components/MediaCard";
+import { MediaCardHoverWrap } from "../components/MediaCardHoverWrap";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -146,7 +147,22 @@ export function HomePage() {
       {items && safeItems.length > 0 && (
         <div className="media-grid home-grid">
           {safeItems.map((item) => (
-            <MediaCard key={item.id} media={item} />
+            <MediaCardHoverWrap
+              key={item.id}
+              mediaId={item.id}
+              previewHint={{
+                title: item.title,
+                posterUrl: item.posterUrl,
+                releaseDate: item.releaseDate,
+              }}
+              popupActions={
+                <Link to={`/media/${item.id}`} className="button-link ghost">
+                  Open details
+                </Link>
+              }
+            >
+              <MediaCard media={item} />
+            </MediaCardHoverWrap>
           ))}
         </div>
       )}
