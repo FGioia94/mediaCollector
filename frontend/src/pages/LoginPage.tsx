@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { HttpError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ErrorMsg, errorMessage } from "../components/StatusViews";
 
@@ -15,6 +16,7 @@ export function LoginPage() {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,7 +36,17 @@ export function LoginPage() {
       await login(identifier.trim(), password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(errorMessage(err));
+      if (err instanceof HttpError) {
+        if (err.status === 404) {
+          setError("User does not exist.");
+        } else if (err.status === 401) {
+          setError("Password is incorrect.");
+        } else {
+          setError(errorMessage(err));
+        }
+      } else {
+        setError(errorMessage(err));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -58,13 +70,23 @@ export function LoginPage() {
         </label>
         <label>
           Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+          <div className="password-field-wrap">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+          </div>
         </label>
         <ErrorMsg>{error}</ErrorMsg>
         <button type="submit" disabled={submitting}>

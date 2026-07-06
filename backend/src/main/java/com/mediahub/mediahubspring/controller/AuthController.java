@@ -5,6 +5,7 @@ import com.mediahub.mediahubspring.dto.AuthResponse;
 import com.mediahub.mediahubspring.dto.ForgotPasswordRequest;
 import com.mediahub.mediahubspring.dto.RegisterRequest;
 import com.mediahub.mediahubspring.dto.ResetPasswordRequest;
+import com.mediahub.mediahubspring.exception.UserNotFoundException;
 import com.mediahub.mediahubspring.model.Role;
 import com.mediahub.mediahubspring.model.User;
 import com.mediahub.mediahubspring.service.PasswordResetService;
@@ -13,9 +14,12 @@ import com.mediahub.mediahubspring.service.UserService;
 import com.mediahub.mediahubspring.security.JwtService;
 import com.mediahub.mediahubspring.util.EmailNormalizer;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Set;
@@ -78,14 +82,23 @@ public class AuthController {
     public AuthResponse login(@Valid @RequestBody AuthRequest request) {
         String normalizedIdentifier = normalizeIdentifier(request.getIdentifier());
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                normalizedIdentifier,
-                        request.getPassword()
-                )
-        );
+        User user;
+        try {
+            user = userService.getByLoginIdentifier(normalizedIdentifier);
+        } catch (UserNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist.");
+        }
 
-        User user = userService.getByLoginIdentifier(normalizedIdentifier);
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            normalizedIdentifier,
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Password is incorrect.");
+        }
 
         String token = jwtService.generateToken(user);
 
