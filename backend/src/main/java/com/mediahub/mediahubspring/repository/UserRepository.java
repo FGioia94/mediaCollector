@@ -3,6 +3,9 @@ import com.mediahub.mediahubspring.model.Role;
 import com.mediahub.mediahubspring.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 import java.util.Optional;
 
@@ -22,6 +25,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = "roles")
     Optional<User> findWithRolesByUsernameIgnoreCase(String username);
+
+    @EntityGraph(attributePaths = "roles")
+    @Query("select u from User u")
+    List<User> findAllWithRoles();
 
     boolean existsByUsernameIgnoreCase(String username);
 

@@ -117,7 +117,7 @@ public class AdminBootstrap {
     }
 
     private void assignMissingUsernames() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAllWithRoles();
         if (users.isEmpty()) {
             return;
         }
