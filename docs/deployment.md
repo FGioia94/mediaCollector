@@ -10,6 +10,7 @@ Reference files:
 - [redeploy.sh](../deploy/redeploy.sh)
 - [bootstrap-server.sh](../deploy/bootstrap-server.sh)
 - [.env.prod.example](../deploy/.env.prod.example)
+- [host Nginx example](../deploy/nginx/mediahub.conf.example)
 
 Services:
 

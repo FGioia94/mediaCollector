@@ -2,9 +2,11 @@
 
 import type { ApiError } from "../types";
 
+const RAW_BASE_URL = import.meta.env.VITE_MEDIA_HUB_BACKEND as string | undefined;
 const BASE_URL =
-  (import.meta.env.VITE_MEDIA_HUB_BACKEND as string | undefined) ??
-  "/api";
+  typeof RAW_BASE_URL === "string" && RAW_BASE_URL.trim().length > 0
+    ? RAW_BASE_URL.trim()
+    : "/api";
 
 const TOKEN_KEY = "mediahub.jwt";
 
@@ -129,6 +131,13 @@ export async function request<T>(
     } else if (typeof parsed === "string" && parsed) {
       message = parsed;
     }
+
+    if (/^No static resource api\//i.test(message)) {
+      message =
+        "API proxy misconfiguration: /api requests are reaching backend without URL rewrite. " +
+        "Configure reverse proxy to strip /api before forwarding.";
+    }
+
     throw new HttpError(
       response.status,
       message,
