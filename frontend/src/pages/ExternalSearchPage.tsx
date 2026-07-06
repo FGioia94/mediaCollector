@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
+import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
 import { ExternalHoverCardWrap } from "../components/ExternalHoverCardWrap";
 import {
@@ -11,7 +12,55 @@ import {
   SkeletonCardGrid,
   errorMessage,
 } from "../components/StatusViews";
-import type { TmdbSearchResponse } from "../types";
+import type { MovieResponse, TmdbSearchResponse } from "../types";
+
+function normalizeTitle(value?: string): string {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function yearFromDate(value?: string): string {
+  return (value ?? "").slice(0, 4);
+}
+
+function buildImportMap(
+  searchResults: TmdbSearchResponse["results"],
+  localMovies: MovieResponse[],
+): Record<number, number> {
+  const byTitleAndYear = new Map<string, number>();
+  const byTitle = new Map<string, number>();
+
+  for (const movie of localMovies) {
+    const normalizedTitle = normalizeTitle(movie.title);
+    if (!normalizedTitle) continue;
+
+    const year = yearFromDate(movie.releaseDate);
+    if (year) {
+      byTitleAndYear.set(`${normalizedTitle}|${year}`, movie.id);
+    }
+    if (!byTitle.has(normalizedTitle)) {
+      byTitle.set(normalizedTitle, movie.id);
+    }
+  }
+
+  const mapped: Record<number, number> = {};
+  for (const result of searchResults) {
+    const normalizedTitle = normalizeTitle(result.title);
+    if (!normalizedTitle) continue;
+
+    const resultYear = yearFromDate(result.releaseDate ?? result.release_date);
+    const titleAndYearKey = `${normalizedTitle}|${resultYear}`;
+
+    const localId = (resultYear ? byTitleAndYear.get(titleAndYearKey) : undefined) ?? byTitle.get(normalizedTitle);
+    if (localId) {
+      mapped[result.id] = localId;
+    }
+  }
+
+  return mapped;
+}
 
 export function ExternalSearchPage() {
   const { isAuthenticated } = useAuth();
@@ -27,11 +76,27 @@ export function ExternalSearchPage() {
   const [actionMsg, setActionMsg] = useState<string | null>(null);
   const autocompleteRequestId = useRef(0);
 
+  const hydrateImportedState = async (searchResults: TmdbSearchResponse["results"]) => {
+    if (!isAuthenticated || searchResults.length === 0) {
+      setImportedLocalIds({});
+      return;
+    }
+
+    try {
+      const localMovies = await movies.listMovies();
+      setImportedLocalIds(buildImportMap(searchResults, localMovies));
+    } catch {
+      // Keep current UI state if backend hydration fails temporarily.
+    }
+  };
+
   const performSearch = async (searchText: string) => {
     setLoading(true);
     setError(null);
     try {
-      setResults(await external.externalSearch(searchText));
+      const response = await external.externalSearch(searchText);
+      setResults(response);
+      await hydrateImportedState(response.results);
     } catch (err) {
       setError(errorMessage(err));
     } finally {

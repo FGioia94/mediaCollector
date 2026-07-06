@@ -41,11 +41,13 @@ class AuthFlowIntegrationTest {
     @Test
     void register_thenLogin_withSameCredentials_succeeds() throws Exception {
         String email = "fresh-user@example.com";
+        String username = "fresh_user";
         String password = "password12";
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                username,
                                 email,
                                 password,
                                 "Fresh",
@@ -67,11 +69,13 @@ class AuthFlowIntegrationTest {
     @Test
     void register_thenLogin_withBcryptLookingPassword_succeeds() throws Exception {
         String email = "bcrypt-prefix@example.com";
+        String username = "bcrypt_user";
         String password = "$2a$abc12345";
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                username,
                                 email,
                                 password,
                                 "Prefix",
@@ -94,11 +98,13 @@ class AuthFlowIntegrationTest {
     void register_thenLogin_withDifferentEmailCase_succeeds() throws Exception {
         String registeredEmail = "case.user@example.com";
         String loginEmail = "Case.User@Example.com";
+        String username = "case_user";
         String password = "password12";
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                username,
                                 registeredEmail,
                                 password,
                                 "Case",
@@ -120,11 +126,13 @@ class AuthFlowIntegrationTest {
     @Test
     void profileImageUpdate_acceptsCanonicalAndTrailingSlashPaths() throws Exception {
         String email = "info@francescogioia.it";
+        String username = "francesco_g";
         String password = "password12";
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                username,
                                 email,
                                 password,
                                 "Francesco",
@@ -172,6 +180,7 @@ class AuthFlowIntegrationTest {
     }
 
     private record RegisterPayload(
+            String username,
             String email,
             String password,
             String firstName,
@@ -179,5 +188,5 @@ class AuthFlowIntegrationTest {
             String profileImage
     ) {}
 
-    private record LoginPayload(String email, String password) {}
+    private record LoginPayload(String identifier, String password) {}
 }

@@ -39,9 +39,11 @@ class UserServiceImplTest {
     void addUser_shouldHashPasswordBeforeSaving() {
         User user = new User();
         user.setEmail("john@example.com");
+        user.setUsernameValue("john_user");
         user.setPassword("plainPass123");
 
         when(userRepository.findByEmailIgnoreCase("john@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameIgnoreCase("john_user")).thenReturn(Optional.empty());
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(new Role("USER")));
         when(passwordEncoder.encode("plainPass123")).thenReturn("hashed-pass");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));

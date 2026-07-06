@@ -5,6 +5,7 @@ import com.mediahub.mediahubspring.model.Role;
 import com.mediahub.mediahubspring.model.User;
 import com.mediahub.mediahubspring.security.JwtAuthenticationFilter;
 import com.mediahub.mediahubspring.security.JwtService;
+import com.mediahub.mediahubspring.service.PasswordResetService;
 import com.mediahub.mediahubspring.service.RoleService;
 import com.mediahub.mediahubspring.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,9 @@ class AuthControllerApiTest {
     @MockBean
     private AuthenticationManager authenticationManager;
 
+        @MockBean
+        private PasswordResetService passwordResetService;
+
     @MockBean
     private JwtService jwtService;
 
@@ -61,6 +65,7 @@ class AuthControllerApiTest {
         String payload = """
                 {
                   "email": "not-an-email",
+                                                                        "username": "ab",
                   "password": "short",
                   "firstName": "",
                   "lastName": "Doe"
@@ -77,7 +82,7 @@ class AuthControllerApiTest {
     void login_withInvalidPayload_returnsBadRequest() throws Exception {
         String payload = """
                 {
-                  "email": "",
+                                                                        "identifier": "",
                   "password": ""
                 }
                 """;
@@ -94,12 +99,14 @@ class AuthControllerApiTest {
         User saved = new User();
         ReflectionTestUtils.setField(saved, "id", 42L);
         saved.setEmail("john@example.com");
+        saved.setUsernameValue("john_doe");
 
         when(roleService.getByName("USER")).thenReturn(role);
         when(userService.addUser(any(User.class))).thenReturn(saved);
         when(jwtService.generateToken(any(User.class))).thenReturn("jwt-token");
 
         String payload = objectMapper.writeValueAsString(new RegisterPayload(
+                "john_doe",
                 "john@example.com",
                 "password12",
                 "John",
@@ -117,6 +124,7 @@ class AuthControllerApiTest {
     }
 
     private record RegisterPayload(
+            String username,
             String email,
             String password,
             String firstName,

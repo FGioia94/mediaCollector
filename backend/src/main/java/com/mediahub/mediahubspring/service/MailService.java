@@ -1,6 +1,7 @@
 package com.mediahub.mediahubspring.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,13 +25,18 @@ public class MailService {
     @Value("${spring.mail.host:}")
     private String smtpHost;
 
-    public MailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public MailService(ObjectProvider<JavaMailSender> mailSenderProvider) {
+        this.mailSender = mailSenderProvider.getIfAvailable();
     }
 
     public boolean sendPasswordResetEmail(String to, String resetLink) {
         if (smtpHost == null || smtpHost.isBlank()) {
             log.warn("SMTP is not configured. Password reset link for {}: {}", to, resetLink);
+            return false;
+        }
+
+        if (mailSender == null) {
+            log.warn("SMTP host is configured but JavaMailSender is unavailable. Password reset link for {}: {}", to, resetLink);
             return false;
         }
 
