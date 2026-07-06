@@ -161,8 +161,8 @@ public class SecurityConfig {
                         // ---------------------------------------------------------
 
                         // Movies & TV Shows deletion
-                        .requestMatchers(HttpMethod.DELETE, "/movies/**", "/api/movies/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/tvshows/**", "/api/tvshows/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/movies/**", "/api/movies/**").hasAnyRole("EDITOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/tvshows/**", "/api/tvshows/**").hasAnyRole("EDITOR", "ADMIN")
 
                         // Reviews deletion (moderation)
                         .requestMatchers(HttpMethod.DELETE, "/reviews/**", "/api/reviews/**").hasRole("ADMIN")

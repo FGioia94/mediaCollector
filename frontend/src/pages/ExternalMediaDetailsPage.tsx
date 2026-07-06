@@ -23,7 +23,7 @@ export function ExternalMediaDetailsPage() {
   const { id: idParam } = useParams<{ id: string }>();
   const id = Number(idParam);
 
-  const { isAuthenticated } = useAuth();
+  const { canEditContent } = useAuth();
   const [data, setData] = useState<EnrichedMediaDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +84,7 @@ export function ExternalMediaDetailsPage() {
             <li>IMDb rating: {data.imdbRating ?? "N/A"}</li>
             <li>Metascore: {data.metascore ?? "N/A"}</li>
           </ul>
-          {isAuthenticated && (
+          {canEditContent && (
             <div className="actions">
               <button type="button" onClick={handleSave}>
                 Save to library

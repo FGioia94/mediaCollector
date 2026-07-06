@@ -41,7 +41,7 @@ function App() {
             <Route
               path="/movies/new"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireEditor>
                   <MovieFormPage />
                 </ProtectedRoute>
               }
@@ -49,7 +49,7 @@ function App() {
             <Route
               path="/movies/:id/edit"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireEditor>
                   <MovieFormPage />
                 </ProtectedRoute>
               }
@@ -59,7 +59,7 @@ function App() {
             <Route
               path="/tvshows/new"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireEditor>
                   <TVShowFormPage />
                 </ProtectedRoute>
               }
@@ -67,7 +67,7 @@ function App() {
             <Route
               path="/tvshows/:id/edit"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireEditor>
                   <TVShowFormPage />
                 </ProtectedRoute>
               }

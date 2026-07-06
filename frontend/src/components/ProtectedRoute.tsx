@@ -6,10 +6,11 @@ import { useAuth } from "../auth/AuthContext";
 interface ProtectedRouteProps {
   children: ReactNode;
   requireAdmin?: boolean;
+  requireEditor?: boolean;
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { isAuthenticated, isAdmin } = useAuth();
+export function ProtectedRoute({ children, requireAdmin = false, requireEditor = false }: ProtectedRouteProps) {
+  const { isAuthenticated, isAdmin, canEditContent } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -17,6 +18,10 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (requireEditor && !canEditContent) {
     return <Navigate to="/" replace />;
   }
 

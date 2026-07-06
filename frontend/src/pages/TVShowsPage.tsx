@@ -13,7 +13,7 @@ import {
 import type { TVShowResponse } from "../types";
 
 export function TVShowsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, canEditContent } = useAuth();
   const [items, setItems] = useState<TVShowResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export function TVShowsPage() {
   useEffect(load, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete this TV show? (admin only)")) return;
+    if (!confirm("Delete this TV show? (editor/admin only)")) return;
     try {
       await tvshows.deleteTVShow(id);
       setActionMsg("Deleted.");
@@ -42,7 +42,7 @@ export function TVShowsPage() {
     <section>
       <header className="page-header">
         <h1>TV Shows</h1>
-        {isAuthenticated && (
+        {canEditContent && (
           <Link to="/tvshows/new" className="button-link">
             + New TV show
           </Link>
@@ -60,14 +60,16 @@ export function TVShowsPage() {
                 <Link to={`/media/${tv.id}`} className="button-link ghost">
                   See details
                 </Link>
-                {isAuthenticated && (
+                {canEditContent && (
                   <>
                     <Link to={`/tvshows/${tv.id}/edit`} className="button-link ghost">
                       Edit
                     </Link>
-                    <button type="button" className="button-link ghost" onClick={() => handleDelete(tv.id)}>
-                      Delete
-                    </button>
+                    {isAuthenticated && (
+                      <button type="button" className="button-link ghost" onClick={() => handleDelete(tv.id)}>
+                        Delete
+                      </button>
+                    )}
                   </>
                 )}
               </>

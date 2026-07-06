@@ -13,7 +13,7 @@ import {
 import type { MovieResponse } from "../types";
 
 export function MoviesPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, canEditContent } = useAuth();
   const [items, setItems] = useState<MovieResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export function MoviesPage() {
   useEffect(load, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete this movie? (admin only)")) return;
+    if (!confirm("Delete this movie? (editor/admin only)")) return;
     try {
       await movies.deleteMovie(id);
       setActionMsg("Movie deleted.");
@@ -42,7 +42,7 @@ export function MoviesPage() {
     <section>
       <header className="page-header">
         <h1>Movies</h1>
-        {isAuthenticated && (
+        {canEditContent && (
           <Link to="/movies/new" className="button-link">
             + New movie
           </Link>
@@ -60,14 +60,16 @@ export function MoviesPage() {
                 <Link to={`/media/${movie.id}`} className="button-link ghost">
                   See details
                 </Link>
-                {isAuthenticated && (
+                {canEditContent && (
                   <>
                     <Link to={`/movies/${movie.id}/edit`} className="button-link ghost">
                       Edit
                     </Link>
-                    <button type="button" className="button-link ghost" onClick={() => handleDelete(movie.id)}>
-                      Delete
-                    </button>
+                    {isAuthenticated && (
+                      <button type="button" className="button-link ghost" onClick={() => handleDelete(movie.id)}>
+                        Delete
+                      </button>
+                    )}
                   </>
                 )}
               </>

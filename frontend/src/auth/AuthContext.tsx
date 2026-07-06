@@ -28,6 +28,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
   isAdmin: boolean;
+  canEditContent: boolean;
   login: (identifier: string, password: string) => Promise<void>;
   register: (body: RegisterRequest) => Promise<void>;
   logout: () => void;
@@ -109,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ...state,
       isAuthenticated: !!state.token,
       isAdmin: state.roles.includes("ADMIN"),
+      canEditContent: state.roles.includes("EDITOR") || state.roles.includes("ADMIN"),
       login,
       register,
       logout,
