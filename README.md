@@ -1,272 +1,131 @@
 # Media Collector
 
-Media Collector is a full-stack media discovery and catalog platform designed to demonstrate production-style engineering across API design, authentication, authorization, data modeling, and modern frontend UX.
+Media Collector is a production-style full-stack platform for media discovery and catalog management.
 
-It is built as a monorepo with:
-- A Spring Boot backend (REST + GraphQL + JWT security + role-based access)
-- A React + TypeScript frontend (Vite)
+Core capabilities:
 
-## Recruiter Quick Scan
+- JWT authentication and role-based authorization
+- Movies/TV catalog management with reviews and watchlist
+- External integrations (TMDB, OMDB) for search/trending/import
+- REST + GraphQL API surface
+- Automated testing and CI/CD with containerized deployment
 
-- Full-stack architecture with clear domain boundaries (auth, users/roles, media, reviews, watchlist)
-- Security-first backend with JWT auth and role-based endpoint protection
-- External API integration (TMDB + OMDB) with local persistence workflows
-- Strong API surface: REST endpoints plus GraphQL queries
-- Frontend account flows, profile management, discovery pages, and admin views
+## Documentation Index
 
-## Product Scope
+Main technical documentation:
 
-Media Collector enables users to:
-- Register, authenticate, and manage account settings
-- Search and discover movies and TV shows
-- Save watchlist items and submit reviews
-- Explore trending external content and import media into the local catalog
+- [Architecture](docs/architecture.md)
+- [API and Security](docs/api-security.md)
+- [Testing Suite](docs/testing.md)
+- [CI/CD Pipeline](docs/ci-cd.md)
+- [Deployment Guide](docs/deployment.md)
 
-Administrative roles can:
-- Manage users and roles
-- Perform protected create/update/delete operations across domain entities
+Component-specific docs:
 
-## Architecture
-
-```mermaid
-flowchart LR
-    FE[React + TypeScript + Vite Frontend]
-    BE[Spring Boot API]
-    DB[(PostgreSQL)]
-    TMDB[TMDB API]
-    OMDB[OMDB API]
-
-    FE -->|JWT + JSON| BE
-    BE --> DB
-    BE --> TMDB
-    BE --> OMDB
-```
+- [Backend Reference](backend/README.md)
+- [Frontend Reference](frontend/README.md)
+- [Postman Collection](backend/postman/media-hub-spring.postman_collection.json)
 
 ## Tech Stack
 
-| Layer | Technology |
+| Layer | Technologies |
 | --- | --- |
 | Frontend | React, TypeScript, Vite, React Router |
 | Backend | Java 17, Spring Boot, Spring Security, Spring Data JPA, Spring GraphQL |
-| Auth | JWT + role-based authorization |
 | Data | PostgreSQL (runtime), H2 (tests) |
-| Integrations | TMDB, OMDB |
-| Tooling | Maven Wrapper, npm |
+| Testing | JUnit, Vitest, Testing Library |
+| DevOps | Docker, Docker Compose, GitHub Actions, GHCR |
 
-## Repository Structure
+## Repository Layout
 
-- backend: Spring Boot service, domain logic, persistence, auth/security, API endpoints
-- frontend: SPA client with authenticated UX flows and media management pages
+- [backend](backend): Spring Boot API, security, business logic, tests
+- [frontend](frontend): React SPA, API client, route guards, tests
+- [deploy](deploy): production compose and redeploy scripts
+- [.github/workflows](.github/workflows): CI/CD workflows
+- [docs](docs): architecture, testing, CI/CD, deployment, API/security docs
 
-## Local Setup
+## Quick Start (Local)
 
-### Prerequisites
+Prerequisites:
 
-- Node.js 20+ and npm
 - Java 17+
+- Node.js 20+
 - PostgreSQL
 
-### 1. Configure backend environment variables
+Required backend environment variables:
 
-Required:
-- MEDIAHUB_DB_URL (example: jdbc:postgresql://localhost:5432/media-hub)
+- MEDIAHUB_DB_URL
 - MEDIAHUB_DB_USERNAME
 - MEDIAHUB_DB_PASSWORD
 - JWT_PASSWORD
 - TMDB_API_KEY
 - OMDB_API_KEY
 
-Recommended for initial admin bootstrap:
+Recommended bootstrap variables:
+
 - MEDIAHUB_ADMIN_EMAIL
 - MEDIAHUB_ADMIN_PASSWORD
 
-Optional for password reset email support:
-- MEDIAHUB_SMTP_HOST
-- MEDIAHUB_SMTP_PORT
-- MEDIAHUB_SMTP_USERNAME
-- MEDIAHUB_SMTP_PASSWORD
-- MEDIAHUB_SMTP_AUTH
-- MEDIAHUB_SMTP_STARTTLS
-
-Optional app settings:
-- MEDIAHUB_FRONTEND_BASE_URL (default: http://localhost:5173)
-- MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES (default: 30)
-- MEDIAHUB_ADMIN_SYNC_PASSWORD_ON_STARTUP (default: false)
-
-### 2. Start backend
-
-From backend:
+Start backend:
 
 ```powershell
+cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-Backend URL: http://localhost:8080
-
-Health endpoints:
-- GET /api/ping
-- GET /api/health
-
-### 3. Start frontend
-
-From frontend:
+Start frontend:
 
 ```powershell
+cd frontend
 npm install
 npm run dev
 ```
 
-Frontend URL: http://localhost:5173
+Default URLs:
 
-The frontend reads the backend base URL from VITE_MEDIA_HUB_BACKEND.
-If not set, it defaults to http://localhost:8080.
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8080
+- Health: http://localhost:8080/api/health
 
-## Commands
+Frontend API base URL:
 
-### Backend
+- Controlled by VITE_MEDIA_HUB_BACKEND
+- Defaults to /api when not set
+
+## Common Commands
+
+Backend:
 
 ```powershell
-# Run test suite
+cd backend
 .\mvnw.cmd test
-
-# Compile only
 .\mvnw.cmd -DskipTests compile
 ```
 
-### Frontend
+Frontend:
 
 ```powershell
-# Development server
-npm run dev
-
-# Production build
+cd frontend
+npm test
 npm run build
-
-# Linting
 npm run lint
 ```
 
-## Simple CI/CD
+## Production Summary
 
-This repo includes a lightweight CI/CD setup based on GitHub Actions.
+Deployment model:
 
-What happens on push to `main`:
-- backend compile runs in CI
-- frontend production build runs in CI
-- Docker images for backend and frontend are built and pushed to GHCR
-- the server is reached via SSH
-- Docker Compose pulls the new images and redeploys the stack
+- Docker images built in CI and pushed to GHCR
+- Remote rollout via SSH + Docker Compose
+- Health checks and preflight validations in redeploy script
 
-Files:
-- `.github/workflows/ci-cd.yml`
-- `deploy/docker-compose.prod.yml`
-- `deploy/redeploy.sh`
-- `deploy/.env.prod.example`
+Primary deployment files:
 
-Why this is a good portfolio-level setup:
-- no Jenkins or self-hosted CI maintenance
-- clear build pipeline with separate validation and deploy stages
-- production-like container deployment flow
-- simple enough to explain in an interview in 2 minutes
+- [ci-cd.yml](.github/workflows/ci-cd.yml)
+- [docker-compose.prod.yml](deploy/docker-compose.prod.yml)
+- [redeploy.sh](deploy/redeploy.sh)
+- [.env.prod.example](deploy/.env.prod.example)
 
-### Required GitHub Secrets
+## Status
 
-Deployment access:
-- `DEPLOY_HOST`
-- `DEPLOY_PORT`
-- `DEPLOY_USER`
-- `DEPLOY_SSH_KEY`
-- `DEPLOY_PATH`
-
-GHCR pull on the server:
-- `GHCR_USERNAME`
-- `GHCR_READ_TOKEN`
-
-Backend runtime configuration:
-- `BACKEND_PORT`
-- `FRONTEND_PORT`
-- `MEDIAHUB_NETWORK`
-- `MEDIAHUB_DB_URL`
-- `MEDIAHUB_DB_USERNAME`
-- `MEDIAHUB_DB_PASSWORD`
-- `JWT_PASSWORD`
-- `TMDB_API_KEY`
-- `OMDB_API_KEY`
-- `MEDIAHUB_ADMIN_EMAIL`
-- `MEDIAHUB_ADMIN_PASSWORD`
-- `MEDIAHUB_FRONTEND_BASE_URL`
-
-Optional mail/runtime settings:
-- `MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES`
-- `MEDIAHUB_SMTP_HOST`
-- `MEDIAHUB_SMTP_PORT`
-- `MEDIAHUB_SMTP_USERNAME`
-- `MEDIAHUB_SMTP_PASSWORD`
-- `MEDIAHUB_SMTP_AUTH`
-- `MEDIAHUB_SMTP_STARTTLS`
-
-### Server Prerequisites
-
-The target server should already have:
-- Docker installed
-- Docker Compose plugin installed
-- a shared Docker network such as `mediahub-net`
-- reverse proxy rules pointing to the frontend container port
-
-### Minimal IaC Angle
-
-If you want a simple DevOps/IaC story for a junior portfolio, use this setup:
-- GitHub Actions for CI/CD
-- Docker Compose for runtime infrastructure definition
-- one bootstrap script for first server setup
-
-Bootstrap script:
-- `deploy/bootstrap-server.sh`
-
-What it does:
-- installs Docker Engine + Docker Compose plugin on Ubuntu
-- creates the deploy directory
-- creates the shared Docker network used by the stack
-
-Example first-run setup on a fresh server:
-
-```bash
-sudo bash deploy/bootstrap-server.sh /opt/media-collector mediahub-net
-```
-
-Why this works well in interviews:
-- easy to explain end-to-end
-- shows repeatable server setup instead of manual clicking
-- avoids overengineering with Kubernetes/Jenkins/Terraform before they are needed
-
-## API and Documentation
-
-- Detailed backend endpoint reference: backend/README.md
-- Postman collection: backend/postman/media-hub-spring.postman_collection.json
-- Frontend project notes: frontend/README.md
-
-## Engineering Highlights
-
-- Centralized error handling strategy in the backend for consistent API responses
-- Security configuration with explicit endpoint access policies by role
-- Data model supporting movies, TV shows, genres, reviews, users, roles, and watchlists
-- Hybrid API strategy (REST + GraphQL) for different client access patterns
-- Frontend request layer with JWT propagation and typed API contracts
-
-## Troubleshooting
-
-- 401 Unauthorized:
-  - Confirm login succeeded and JWT is present in localStorage.
-  - Verify JWT_PASSWORD is correctly configured in backend env.
-
-- 403 Forbidden:
-  - Confirm role permissions for the endpoint.
-  - Re-login after any role changes to refresh JWT claims.
-
-- Frontend cannot reach backend:
-  - Ensure backend is running on port 8080 or set VITE_MEDIA_HUB_BACKEND.
-  - Ensure CORS origin is allowed for your frontend host/port.
-
-## Project Status
-
-Active development. Core features are implemented and runnable locally as a full-stack system.
+Active development with production-oriented architecture, automated tests, and CI/CD deployment pipeline.

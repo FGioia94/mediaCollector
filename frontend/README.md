@@ -1,75 +1,93 @@
-# React + TypeScript + Vite
+# Frontend - Media Collector
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend SPA for the Media Collector project.
 
-Currently, two official plugins are available:
+Stack:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React + TypeScript
+- Vite
+- React Router
+- Vitest + Testing Library
 
-## React Compiler
+## Goal
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Provide a fast and clear interface for:
 
-Note: This will impact Vite dev & build performances.
+- user authentication
+- movie/TV catalog management
+- reviews and watchlist
+- external content discovery with import into the local catalog
 
-## Expanding the ESLint configuration
+## Local Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Prerequisites:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 20+
+- npm
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Install and run the development server:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Local URL: http://localhost:5173
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## API Configuration
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Supported environment variable:
+
+- VITE_MEDIA_HUB_BACKEND
+
+Behavior:
+
+- if set, the client uses that base URL
+- if not set, the client uses /api (recommended with reverse proxy setup)
+
+.env example:
+
+```env
+VITE_MEDIA_HUB_BACKEND=http://localhost:8080
+```
+
+## Useful Scripts
+
+```powershell
+# Development
+npm run dev
+
+# Test
+npm test
+
+# Production build
+npm run build
+
+# Lint
+npm run lint
+```
+
+## Main Structure
+
+- src/api/: typed API client layer
+- src/auth/: authentication and role state
+- src/components/: reusable components
+- src/pages/: application pages
+- src/utils/: UI and business helpers
+
+## Implementation Notes
+
+- the API layer centralizes JWT token handling and error mapping
+- protected routes use role-based guards
+- hover popups display trailers and metadata with robust fallbacks
+- the UI handles unexpected payloads without runtime crashes
+
+## Test
+
+The frontend suite includes regression tests for critical flows (for example, external search import).
+
+Run:
+
+```powershell
+npm test
 ```
