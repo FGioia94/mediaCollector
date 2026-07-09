@@ -117,10 +117,10 @@ export function MediaDetailsPage() {
       .catch(() => setIsInWatchlist(false));
   }, [isAuthenticated, userId, id]);
 
-  if (error) return <ErrorMsg>{error}</ErrorMsg>;
-  if (!loaded) return <SkeletonDetails />;
-
-  const { kind, data, reviews: itemReviews, avgRating } = loaded;
+  const kind = loaded?.kind ?? "unknown";
+  const data = loaded?.data ?? null;
+  const itemReviews = loaded?.reviews ?? [];
+  const avgRating = loaded?.avgRating ?? null;
 
   const filteredSortedReviews = useMemo(() => {
     const q = reviewQuery.trim().toLowerCase();
@@ -173,6 +173,9 @@ export function MediaDetailsPage() {
     (currentReviewPage - 1) * reviewPageSize,
     currentReviewPage * reviewPageSize,
   );
+
+  if (error) return <ErrorMsg>{error}</ErrorMsg>;
+  if (!loaded) return <SkeletonDetails />;
 
   const handleReview = async (event: FormEvent) => {
     event.preventDefault();
