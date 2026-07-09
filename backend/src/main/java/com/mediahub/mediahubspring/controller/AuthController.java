@@ -8,11 +8,13 @@ import com.mediahub.mediahubspring.dto.ResetPasswordRequest;
 import com.mediahub.mediahubspring.exception.UserNotFoundException;
 import com.mediahub.mediahubspring.model.Role;
 import com.mediahub.mediahubspring.model.User;
+import com.mediahub.mediahubspring.security.AuthRateLimiter;
 import com.mediahub.mediahubspring.service.PasswordResetService;
 import com.mediahub.mediahubspring.service.RoleService;
 import com.mediahub.mediahubspring.service.UserService;
 import com.mediahub.mediahubspring.security.JwtService;
 import com.mediahub.mediahubspring.util.EmailNormalizer;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,24 +36,29 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final AuthRateLimiter authRateLimiter;
 
     public AuthController(UserService userService,
                           RoleService roleService,
                           PasswordResetService passwordResetService,
                           AuthenticationManager authenticationManager,
-                          JwtService jwtService) {
+                          JwtService jwtService,
+                          AuthRateLimiter authRateLimiter) {
         this.userService = userService;
         this.roleService = roleService;
         this.passwordResetService = passwordResetService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.authRateLimiter = authRateLimiter;
     }
 
     // ---------------------------------------------------------
     // REGISTER
     // ---------------------------------------------------------
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
+        authRateLimiter.checkOrThrow("auth-register", servletRequest);
+
         // Normalize once at the API boundary to keep auth lookups consistent.
         String normalizedEmail = EmailNormalizer.normalize(request.getEmail());
         String normalizedUsername = normalizeUsername(request.getUsername());
@@ -79,7 +86,9 @@ public class AuthController {
     // LOGIN
     // ---------------------------------------------------------
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody AuthRequest request) {
+    public AuthResponse login(@Valid @RequestBody AuthRequest request, HttpServletRequest servletRequest) {
+        authRateLimiter.checkOrThrow("auth-login", servletRequest);
+
         String normalizedIdentifier = normalizeIdentifier(request.getIdentifier());
 
         User user;
@@ -106,7 +115,9 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public Map<String, String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public Map<String, String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request, HttpServletRequest servletRequest) {
+        authRateLimiter.checkOrThrow("auth-forgot-password", servletRequest);
+
         String resetLink = passwordResetService.requestPasswordReset(request.getEmail());
         if (resetLink != null) {
             return Map.of(
@@ -118,7 +129,9 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public Map<String, String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public Map<String, String> resetPassword(@Valid @RequestBody ResetPasswordRequest request, HttpServletRequest servletRequest) {
+        authRateLimiter.checkOrThrow("auth-reset-password", servletRequest);
+
         passwordResetService.resetPassword(request.getToken(), request.getPassword());
         return Map.of("message", "Password updated successfully.");
     }

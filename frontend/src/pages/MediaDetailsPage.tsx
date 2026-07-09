@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 
@@ -8,6 +8,7 @@ import * as tvshows from "../api/tvshows";
 import * as reviews from "../api/reviews";
 import * as watchlist from "../api/watchlist";
 import { useAuth } from "../auth/AuthContext";
+import { ListControls } from "../components/ListControls";
 import {
   EmptyMsg,
   ErrorMsg,
@@ -70,8 +71,15 @@ export function MediaDetailsPage() {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState<number>(8);
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
+  const [reviewQuery, setReviewQuery] = useState("");
+  const [reviewMinRating, setReviewMinRating] = useState<number | "">("");
+  const [reviewSortBy, setReviewSortBy] = useState<"createdAt" | "rating" | "author">("createdAt");
+  const [reviewSortDir, setReviewSortDir] = useState<"asc" | "desc">("desc");
+  const [reviewPageSize, setReviewPageSize] = useState(6);
+  const [reviewPage, setReviewPage] = useState(1);
 
   const [watchlistMsg, setWatchlistMsg] = useState<string | null>(null);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   const refresh = () => {
     loadMediaDetails(id)
@@ -88,10 +96,83 @@ export function MediaDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+    if (!Number.isFinite(id) || !loaded) return;
+    if (loaded.kind !== "movie" && loaded.kind !== "tv") return;
+
+    sessionStorage.setItem(`media.kind.${id}`, loaded.kind);
+    window.dispatchEvent(new Event("media-kind-updated"));
+  }, [id, loaded]);
+
+  useEffect(() => {
+    setWatchlistMsg(null);
+    if (!isAuthenticated || !userId || !Number.isFinite(id)) {
+      setIsInWatchlist(false);
+      return;
+    }
+
+    watchlist
+      .watchlistExists(userId, id)
+      .then((exists) => setIsInWatchlist(Boolean(exists)))
+      .catch(() => setIsInWatchlist(false));
+  }, [isAuthenticated, userId, id]);
+
   if (error) return <ErrorMsg>{error}</ErrorMsg>;
   if (!loaded) return <SkeletonDetails />;
 
   const { kind, data, reviews: itemReviews, avgRating } = loaded;
+
+  const filteredSortedReviews = useMemo(() => {
+    const q = reviewQuery.trim().toLowerCase();
+
+    const filtered = itemReviews.filter((review) => {
+      if (reviewMinRating !== "" && review.rating < reviewMinRating) {
+        return false;
+      }
+
+      if (!q) {
+        return true;
+      }
+
+      const haystack = [
+        review.text,
+        review.authorUsername,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+
+    const sorted = [...filtered];
+    sorted.sort((left, right) => {
+      const direction = reviewSortDir === "asc" ? 1 : -1;
+
+      if (reviewSortBy === "rating") {
+        return (left.rating - right.rating) * direction;
+      }
+
+      if (reviewSortBy === "author") {
+        return (left.authorUsername || "").localeCompare(right.authorUsername || "") * direction;
+      }
+
+      return (new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()) * direction;
+    });
+
+    return sorted;
+  }, [itemReviews, reviewMinRating, reviewQuery, reviewSortBy, reviewSortDir]);
+
+  useEffect(() => {
+    setReviewPage(1);
+  }, [itemReviews, reviewQuery, reviewMinRating, reviewSortBy, reviewSortDir, reviewPageSize]);
+
+  const reviewTotalPages = Math.max(1, Math.ceil(filteredSortedReviews.length / reviewPageSize));
+  const currentReviewPage = Math.min(reviewPage, reviewTotalPages);
+  const paginatedReviews = filteredSortedReviews.slice(
+    (currentReviewPage - 1) * reviewPageSize,
+    currentReviewPage * reviewPageSize,
+  );
 
   const handleReview = async (event: FormEvent) => {
     event.preventDefault();
@@ -131,8 +212,13 @@ export function MediaDetailsPage() {
       setWatchlistMsg("Session account id not available. Please log out and sign in again.");
       return;
     }
+    if (isInWatchlist) {
+      setWatchlistMsg("Already in your watchlist.");
+      return;
+    }
     try {
       await watchlist.addToWatchlist({ userId, mediaItemId: id });
+      setIsInWatchlist(true);
       setWatchlistMsg("Added to your watchlist.");
     } catch (err) {
       setWatchlistMsg(errorMessage(err));
@@ -178,9 +264,15 @@ export function MediaDetailsPage() {
               )}
               {isAuthenticated && (
                 <div className="actions">
-                  <button type="button" onClick={handleWatchlist}>
-                    Add to watchlist
-                  </button>
+                  {isInWatchlist ? (
+                    <button type="button" disabled>
+                      Already in watchlist
+                    </button>
+                  ) : (
+                    <button type="button" onClick={handleWatchlist}>
+                      Add to watchlist
+                    </button>
+                  )}
                   {watchlistMsg && <p className="status">{watchlistMsg}</p>}
                 </div>
               )}
@@ -193,15 +285,75 @@ export function MediaDetailsPage() {
               {isAuthenticated ? "No reviews yet." : "No reviews yet, log in to add a review"}
             </EmptyMsg>
           )}
-          <ul className="reviews">
-            {itemReviews.map((review) => (
-              <li key={review.id}>
-                <strong>Rating {review.rating}/10</strong> · {review.authorUsername || `author#${review.authorId}`}
-                <p>{review.text}</p>
-                <small>{new Date(review.createdAt).toLocaleString()}</small>
-              </li>
-            ))}
-          </ul>
+          {itemReviews.length > 0 && (
+            <>
+              <div className="filters" role="group" aria-label="Media review filters">
+                <label>
+                  Search
+                  <input
+                    type="search"
+                    placeholder="Review text or author"
+                    value={reviewQuery}
+                    onChange={(e) => setReviewQuery(e.target.value)}
+                  />
+                </label>
+
+                <label>
+                  Min rating
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={reviewMinRating}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setReviewMinRating(value === "" ? "" : Number(value));
+                    }}
+                    placeholder="Any"
+                  />
+                </label>
+              </div>
+
+              <ListControls
+                sortBy={reviewSortBy}
+                sortDir={reviewSortDir}
+                sortOptions={[
+                  { value: "createdAt", label: "Date" },
+                  { value: "rating", label: "Rating" },
+                  { value: "author", label: "Author" },
+                ]}
+                onSortByChange={(value) => {
+                  if (value === "createdAt" || value === "rating" || value === "author") {
+                    setReviewSortBy(value);
+                  } else {
+                    setReviewSortBy("createdAt");
+                  }
+                }}
+                onSortDirChange={setReviewSortDir}
+                pageSize={reviewPageSize}
+                onPageSizeChange={setReviewPageSize}
+                page={currentReviewPage}
+                totalPages={reviewTotalPages}
+                totalItems={filteredSortedReviews.length}
+                visibleItems={paginatedReviews.length}
+                onPageChange={(nextPage) => setReviewPage(Math.min(reviewTotalPages, Math.max(1, nextPage)))}
+              />
+
+              {filteredSortedReviews.length === 0 && (
+                <EmptyMsg>No reviews match these filters.</EmptyMsg>
+              )}
+
+              <ul className="reviews">
+                {paginatedReviews.map((review) => (
+                  <li key={review.id}>
+                    <strong>Rating {review.rating}/10</strong> · {review.authorUsername || `author#${review.authorId}`}
+                    <p>{review.text}</p>
+                    <small>{new Date(review.createdAt).toLocaleString()}</small>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           {isAuthenticated && (
             <form onSubmit={handleReview} className="vstack">

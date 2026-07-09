@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import * as reviewsApi from "../api/reviews";
 import { useAuth } from "../auth/AuthContext";
+import { ListControls } from "../components/ListControls";
 import { MediaHoverLink } from "../components/MediaHoverLink";
 import {
   EmptyMsg,
@@ -19,6 +20,13 @@ export function ReviewsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
   const [editRating, setEditRating] = useState(8);
+  const [query, setQuery] = useState("");
+  const [minRating, setMinRating] = useState<number | "">("");
+  const [onlyMine, setOnlyMine] = useState(false);
+  const [sortBy, setSortBy] = useState<"createdAt" | "rating" | "mediaTitle" | "author">("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [pageSize, setPageSize] = useState(12);
+  const [page, setPage] = useState(1);
 
   const load = () => {
     reviewsApi
@@ -35,6 +43,64 @@ export function ReviewsPage() {
   };
 
   useEffect(load, []);
+
+  const filteredSortedItems = useMemo(() => {
+    if (!items) return [];
+
+    const q = query.trim().toLowerCase();
+    const filtered = items.filter((review) => {
+      if (onlyMine && userId !== review.authorId) {
+        return false;
+      }
+      if (minRating !== "" && review.rating < minRating) {
+        return false;
+      }
+      if (!q) {
+        return true;
+      }
+
+      const haystack = [
+        review.text,
+        review.mediaTitle,
+        review.authorUsername,
+        String(review.mediaItemId),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+
+    const sorted = [...filtered];
+    sorted.sort((left, right) => {
+      const direction = sortDir === "asc" ? 1 : -1;
+
+      if (sortBy === "rating") {
+        return (left.rating - right.rating) * direction;
+      }
+
+      if (sortBy === "createdAt") {
+        return (new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()) * direction;
+      }
+
+      if (sortBy === "mediaTitle") {
+        return (left.mediaTitle || "").localeCompare(right.mediaTitle || "") * direction;
+      }
+
+      return (left.authorUsername || "").localeCompare(right.authorUsername || "") * direction;
+    });
+
+    return sorted;
+  }, [items, minRating, onlyMine, query, sortBy, sortDir, userId]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [items, query, minRating, onlyMine, sortBy, sortDir, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredSortedItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedItems = filteredSortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleSave = async (id: number) => {
     try {
@@ -64,8 +130,77 @@ export function ReviewsPage() {
       {items === null && !error && <SkeletonTable rows={5} cols={3} />}
       {items && items.length === 0 && <EmptyMsg>No reviews yet.</EmptyMsg>}
       {items && items.length > 0 && (
+        <>
+          <div className="filters" role="group" aria-label="Review filters">
+            <label>
+              Search
+              <input
+                type="search"
+                placeholder="Text, author, media title"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </label>
+
+            <label>
+              Min rating
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={minRating}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setMinRating(value === "" ? "" : Number(value));
+                }}
+                placeholder="Any"
+              />
+            </label>
+
+            {isAuthenticated && (
+              <label className="checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={onlyMine}
+                  onChange={(e) => setOnlyMine(e.target.checked)}
+                />
+                Only my reviews
+              </label>
+            )}
+          </div>
+
+          <ListControls
+            sortBy={sortBy}
+            sortDir={sortDir}
+            sortOptions={[
+              { value: "createdAt", label: "Date" },
+              { value: "rating", label: "Rating" },
+              { value: "mediaTitle", label: "Media title" },
+              { value: "author", label: "Author" },
+            ]}
+            onSortByChange={(value) => {
+              if (value === "createdAt" || value === "rating" || value === "mediaTitle" || value === "author") {
+                setSortBy(value);
+              } else {
+                setSortBy("createdAt");
+              }
+            }}
+            onSortDirChange={setSortDir}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredSortedItems.length}
+            visibleItems={paginatedItems.length}
+            onPageChange={(nextPage) => setPage(Math.min(totalPages, Math.max(1, nextPage)))}
+          />
+
+          {filteredSortedItems.length === 0 && (
+            <EmptyMsg>No reviews match these filters.</EmptyMsg>
+          )}
+
         <ul className="reviews">
-          {items.map((review) => (
+          {paginatedItems.map((review) => (
             <li key={review.id}>
               {editingId === review.id ? (
                 <div className="vstack">
@@ -170,6 +305,7 @@ export function ReviewsPage() {
             </li>
           ))}
         </ul>
+        </>
       )}
     </section>
   );
