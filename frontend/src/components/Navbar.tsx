@@ -27,6 +27,7 @@ export function Navbar() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    document.body.setAttribute("data-theme", theme);
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
@@ -52,6 +53,12 @@ export function Navbar() {
         <div className="navbar-brand">
           <NavLink to="/">MediaHub</NavLink>
         </div>
+      </div>
+
+      <div className="navbar-utility">
+        <button type="button" className="theme-toggle" onClick={toggleTheme}>
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
       </div>
 
       <button
@@ -112,9 +119,6 @@ export function Navbar() {
         </ul>
 
         <div className="navbar-auth">
-        <button type="button" className="theme-toggle" onClick={toggleTheme}>
-          {theme === "dark" ? "Light" : "Dark"}
-        </button>
         {isAuthenticated ? (
           <>
             <span className="navbar-email">{username}</span>
