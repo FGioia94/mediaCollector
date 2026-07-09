@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mediahub.mediahubspring.model.Role;
 import com.mediahub.mediahubspring.model.User;
 import com.mediahub.mediahubspring.security.JwtAuthenticationFilter;
+import com.mediahub.mediahubspring.security.AuthRateLimiter;
 import com.mediahub.mediahubspring.security.JwtService;
 import com.mediahub.mediahubspring.service.PasswordResetService;
 import com.mediahub.mediahubspring.service.RoleService;
@@ -56,6 +57,9 @@ class AuthControllerApiTest {
 
     @MockBean
     private JwtService jwtService;
+
+        @MockBean
+        private AuthRateLimiter authRateLimiter;
 
         @MockBean
         private JwtAuthenticationFilter jwtAuthenticationFilter;
