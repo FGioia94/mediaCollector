@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./auth/AuthContext";
+import { Breadcrumbs } from "./components/Breadcrumbs";
 import { Navbar } from "./components/Navbar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
@@ -32,6 +33,7 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <main className="app-main">
+          <Breadcrumbs />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/discover" element={<DiscoverPage />} />

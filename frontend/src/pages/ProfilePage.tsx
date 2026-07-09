@@ -248,9 +248,6 @@ export function ProfilePage() {
         {loadingImage && <span className="status">Loading profile image...</span>}
         {imageSaved && <span className="status">Image saved.</span>}
         {imageError && <span className="status error">{imageError}</span>}
-        <small className="form-help">
-          Your profile image is saved to your account in the backend database.
-        </small>
       </form>
 
       <hr className="profile-divider" />

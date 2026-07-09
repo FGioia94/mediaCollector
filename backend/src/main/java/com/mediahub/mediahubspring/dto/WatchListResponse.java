@@ -1,7 +1,5 @@
 package com.mediahub.mediahubspring.dto;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 public class WatchListResponse {
@@ -12,6 +10,8 @@ public class WatchListResponse {
 
     private Long mediaItemId;
 
+    private String mediaTitle;
+
     private LocalDateTime addedAt;
 
     public WatchListResponse() {
@@ -21,10 +21,12 @@ public class WatchListResponse {
             Long id,
             Long userId,
             Long mediaItemId,
+            String mediaTitle,
             LocalDateTime addedAt) {
         this.id = id;
         this.userId = userId;
         this.mediaItemId = mediaItemId;
+        this.mediaTitle = mediaTitle;
         this.addedAt = addedAt;
     }
 
@@ -41,6 +43,10 @@ public class WatchListResponse {
 
     public Long getMediaItemId() {
         return mediaItemId;
+    }
+
+    public String getMediaTitle() {
+        return mediaTitle;
     }
 
     public LocalDateTime getAddedAt() {

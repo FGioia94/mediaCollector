@@ -112,8 +112,7 @@ export function MoviesPage() {
             totalPages={totalPages}
             totalItems={sortedItems.length}
             visibleItems={paginatedItems.length}
-            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
-            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+            onPageChange={(nextPage) => setPage(Math.min(totalPages, Math.max(1, nextPage)))}
           />
           <div className="media-grid">
           {paginatedItems.map((movie) => {

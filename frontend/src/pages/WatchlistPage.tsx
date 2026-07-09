@@ -59,11 +59,11 @@ export function WatchlistPage() {
       {items === null && !error && <SkeletonTable rows={4} cols={2} />}
       {items && items.length === 0 && <EmptyMsg>Your watchlist is empty.</EmptyMsg>}
       {items && items.length > 0 && (
-        <ul className="list">
+        <ul className="list watchlist-list">
           {items.map((entry) => (
             <li key={entry.id}>
               <MediaHoverLink mediaId={entry.mediaItemId}>
-                Media #{entry.mediaItemId}
+                {entry.mediaTitle || `Media #${entry.mediaItemId}`}
               </MediaHoverLink>
               <small> added {new Date(entry.addedAt).toLocaleString()}</small>
               <span className="row-actions">

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import * as external from "../api/external";
+import * as movies from "../api/movies";
 import { useAuth } from "../auth/AuthContext";
 import { ExternalHoverCardWrap } from "../components/ExternalHoverCardWrap";
 import { ListControls } from "../components/ListControls";
@@ -11,11 +12,45 @@ import {
   SkeletonCardGrid,
   errorMessage,
 } from "../components/StatusViews";
-import type { TrendingMediaResponse } from "../types";
+import type { MovieResponse, TrendingMediaResponse } from "../types";
+
+function normalizeTitle(value?: string): string {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function buildTrendingImportMap(
+  trendingItems: TrendingMediaResponse[],
+  localMovies: MovieResponse[],
+): Record<number, number> {
+  const mapped: Record<number, number> = {};
+
+  for (const item of trendingItems) {
+    const normalizedTrendingTitle = normalizeTitle(item.title);
+    if (!normalizedTrendingTitle) continue;
+
+    const local = localMovies.find((movie) => {
+      const localTitle = normalizeTitle(movie.title);
+      if (!localTitle) return false;
+      return localTitle === normalizedTrendingTitle
+        || localTitle.includes(normalizedTrendingTitle)
+        || normalizedTrendingTitle.includes(localTitle);
+    });
+
+    if (local?.id) {
+      mapped[item.externalId] = local.id;
+    }
+  }
+
+  return mapped;
+}
 
 export function TrendingPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, canEditContent } = useAuth();
   const [items, setItems] = useState<TrendingMediaResponse[] | null>(null);
+  const [importedLocalIds, setImportedLocalIds] = useState<Record<number, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
@@ -24,14 +59,21 @@ export function TrendingPage() {
   const [pageSize, setPageSize] = useState(12);
   const [page, setPage] = useState(1);
 
-  const load = () => {
-    external
-      .trending()
-      .then(setItems)
-      .catch((err) => setError(errorMessage(err)));
+  const load = async () => {
+    try {
+      const rows = await external.trending();
+      setItems(rows);
+
+      const localMovies = await movies.listMovies();
+      setImportedLocalIds(buildTrendingImportMap(rows, localMovies));
+    } catch (err) {
+      setError(errorMessage(err));
+    }
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const sortedItems = useMemo(() => {
     if (!items) return [];
@@ -107,21 +149,21 @@ export function TrendingPage() {
             totalPages={totalPages}
             totalItems={sortedItems.length}
             visibleItems={paginatedItems.length}
-            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
-            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+            onPageChange={(nextPage) => setPage(Math.min(totalPages, Math.max(1, nextPage)))}
           />
           <div className="media-grid">
           {paginatedItems.map((item) => {
+            const resolvedLocalId = item.localMovieId ?? importedLocalIds[item.externalId] ?? null;
             const cardActions = (
               <>
                 <Link to={`/external/movie/${item.externalId}`} className="button-link ghost">
                   See more
                 </Link>
-                {item.savedLocally && item.localMovieId !== null ? (
-                  <Link to={`/media/${item.localMovieId}`} className="button-link ghost">
+                {resolvedLocalId !== null ? (
+                  <Link to={`/media/${resolvedLocalId}`} className="button-link ghost">
                     View local
                   </Link>
-                ) : isAuthenticated ? (
+                ) : isAuthenticated && canEditContent ? (
                   <button
                     type="button"
                     onClick={() => handleSave(item.externalId)}

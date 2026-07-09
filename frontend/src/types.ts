@@ -151,6 +151,7 @@ export interface WatchListResponse {
   id: number;
   userId: number;
   mediaItemId: number;
+  mediaTitle?: string;
   addedAt: string;
 }
 

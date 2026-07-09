@@ -9,21 +9,12 @@ type ThemeMode = "light" | "dark";
 export function Navbar() {
   const { isAuthenticated, username, logout, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return stored === "light" || stored === "dark" ? stored : "dark";
+  });
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    const preferredDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const nextTheme: ThemeMode = stored === "dark" || stored === "light"
-      ? stored
-      : preferredDark
-        ? "dark"
-        : "light";
-
-    setTheme(nextTheme);
-  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

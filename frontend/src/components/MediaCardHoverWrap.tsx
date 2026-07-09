@@ -184,7 +184,8 @@ export function MediaCardHoverWrap({ mediaId, children, popupActions, previewHin
 
   const isInteractiveTarget = (target: EventTarget | null): boolean => {
     if (!(target instanceof HTMLElement)) return false;
-    return !!target.closest("button, a, .card-actions");
+    // Ignore controls in action areas, but allow full-card links to trigger preview hover.
+    return !!target.closest(".card-actions button, .card-actions a, .row-actions button, .row-actions a");
   };
 
   const clearHoverDelay = () => {

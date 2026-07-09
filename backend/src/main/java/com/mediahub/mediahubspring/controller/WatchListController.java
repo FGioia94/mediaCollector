@@ -112,6 +112,7 @@ public class WatchListController {
                 w.getId(),
                 w.getUser().getId(),
                 w.getMediaItem().getId(),
+                w.getMediaItem().getTitle(),
                 w.getAddedAt()
         );
     }

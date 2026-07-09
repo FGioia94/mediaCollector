@@ -44,7 +44,7 @@ public class TmdbClient {
     }
 
     public TmdbSearchResponse getTrendingMovies() {
-        String url = "https://api.themoviedb.org/3/movie/popular?api_key=" + apiKey;
+        String url = "https://api.themoviedb.org/3/trending/movie/day?api_key=" + apiKey;
 
         try {
             return rest.getForObject(url, TmdbSearchResponse.class);

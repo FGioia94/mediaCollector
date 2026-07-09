@@ -162,7 +162,11 @@ export function MediaDetailsPage() {
                 <ul className="meta">
                   <li>Director: {(data as MovieResponse).director}</li>
                   <li>Duration: {(data as MovieResponse).duration} min</li>
-                  <li>Budget: ${(data as MovieResponse).budget?.toLocaleString()}</li>
+                  <li>
+                    Budget: {(data as MovieResponse).budget && (data as MovieResponse).budget > 0
+                      ? `$${(data as MovieResponse).budget.toLocaleString()}`
+                      : "Unknown"}
+                  </li>
                 </ul>
               )}
               {kind === "tv" && (
@@ -185,7 +189,9 @@ export function MediaDetailsPage() {
 
           <h2>Reviews ({itemReviews.length})</h2>
           {itemReviews.length === 0 && (
-            <EmptyMsg>No reviews yet.</EmptyMsg>
+            <EmptyMsg>
+              {isAuthenticated ? "No reviews yet." : "No reviews yet, log in to add a review"}
+            </EmptyMsg>
           )}
           <ul className="reviews">
             {itemReviews.map((review) => (

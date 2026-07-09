@@ -45,7 +45,7 @@ export function HomePage() {
     <section className="home-page">
       <div className="home-hero">
         <div>
-          <h1>Build and curate your cinematic catalog with confidence.</h1>
+          <h1>Build your cinematic catalog</h1>
 
           <div className="home-hero-actions">
             <Link className="button-link" to="/discover">

@@ -54,7 +54,20 @@ function buildImportMap(
     const resultYear = yearFromDate(result.releaseDate ?? result.release_date);
     const titleAndYearKey = `${normalizedTitle}|${resultYear}`;
 
-    const localId = (resultYear ? byTitleAndYear.get(titleAndYearKey) : undefined) ?? byTitle.get(normalizedTitle);
+    const localId =
+      (resultYear ? byTitleAndYear.get(titleAndYearKey) : undefined)
+      ?? byTitle.get(normalizedTitle)
+      ?? localMovies.find((movie) => {
+        const localTitle = normalizeTitle(movie.title);
+        if (!localTitle) return false;
+        if (!localTitle.includes(normalizedTitle) && !normalizedTitle.includes(localTitle)) {
+          return false;
+        }
+
+        const localYear = yearFromDate(movie.releaseDate);
+        if (!resultYear || !localYear) return true;
+        return localYear === resultYear;
+      })?.id;
     if (localId) {
       mapped[result.id] = localId;
     }
@@ -64,7 +77,7 @@ function buildImportMap(
 }
 
 export function ExternalSearchPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, canEditContent } = useAuth();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TmdbSearchResponse | null>(null);
   const [importedLocalIds, setImportedLocalIds] = useState<Record<number, number>>({});
@@ -337,8 +350,7 @@ export function ExternalSearchPage() {
             totalPages={totalPages}
             totalItems={sortedResults.length}
             visibleItems={paginatedResults.length}
-            onPrevPage={() => setPage((current) => Math.max(1, current - 1))}
-            onNextPage={() => setPage((current) => Math.min(totalPages, current + 1))}
+            onPageChange={(nextPage) => setPage(Math.min(totalPages, Math.max(1, nextPage)))}
           />
           <div className="media-grid">
           {paginatedResults.map((item) => {
@@ -352,11 +364,11 @@ export function ExternalSearchPage() {
                   <Link to={`/media/${importedLocalId}`} className="button-link ghost">
                     View local
                   </Link>
-                ) : (
+                ) : canEditContent ? (
                   <button type="button" onClick={() => handleSave(item.id)} disabled={savingId === item.id}>
                     {savingId === item.id ? "Importing..." : "Import"}
                   </button>
-                ) : null}
+                ) : null : null}
               </>
             );
 
