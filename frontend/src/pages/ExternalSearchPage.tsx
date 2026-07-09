@@ -221,7 +221,7 @@ export function ExternalSearchPage() {
   return (
     <section>
       <h1>Search</h1>
-      <form onSubmit={handleSearch} className="hstack">
+      <form onSubmit={handleSearch} className="hstack search-form">
         <div className="autocomplete">
           <input
             value={query}

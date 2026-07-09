@@ -199,7 +199,7 @@ textarea:focus-visible {
 label {
   display: block;
   margin-bottom: 0.65rem;
-  color: #312a22;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -747,6 +747,22 @@ fieldset {
   flex: 1;
 }
 
+.search-form {
+  align-items: end;
+}
+
+.search-form .autocomplete {
+  flex: 0 1 360px;
+}
+
+.search-form .autocomplete input {
+  width: 100%;
+}
+
+.search-form > button {
+  flex: 0 0 auto;
+}
+
 .list-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -772,13 +788,14 @@ fieldset {
   margin-left: auto;
   white-space: nowrap;
   font-size: 0.84rem;
+  color: var(--muted);
 }
 
 .pagination-controls {
   margin-top: 0.9rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.6rem;
 }
 
