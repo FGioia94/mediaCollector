@@ -1003,7 +1003,7 @@ fieldset {
   position: absolute;
   left: 0;
   top: calc(100% + 0.5rem);
-  z-index: 80;
+  z-index: 50;
   width: 210px;
   border-radius: 12px;
   border: 1px solid #d9c2a5;
@@ -1065,7 +1065,7 @@ fieldset {
 
 .external-hover-trigger-wrap:hover,
 .external-hover-trigger-wrap:focus-within {
-  z-index: 220;
+  z-index: 40;
 }
 
 .external-hover-link-wrap {
@@ -1078,7 +1078,7 @@ fieldset {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1200;
+  z-index: 55;
   width: min(88vw, 860px);
   max-height: 86vh;
   border-radius: 12px;
@@ -1179,7 +1179,7 @@ fieldset {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1200;
+  z-index: 55;
   width: min(88vw, 620px);
   max-height: 82vh;
   border-radius: 12px;
@@ -1690,6 +1690,162 @@ fieldset {
   border-radius: 14px;
   overflow: hidden;
   background: #2a2319;
+}
+
+:root[data-theme="dark"] .filters {
+  background: var(--panel-subtle-bg);
+}
+
+:root[data-theme="dark"] .media-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .media-card:hover {
+  border-color: #58aeb7;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.36);
+}
+
+:root[data-theme="dark"] .media-card-poster {
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .media-card-meta span {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .media-hover-card,
+:root[data-theme="dark"] .external-hover-card,
+:root[data-theme="dark"] .media-card-hover-modal {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .media-hover-poster,
+:root[data-theme="dark"] .external-hover-poster,
+:root[data-theme="dark"] .media-card-hover-poster {
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .media-hover-meta small,
+:root[data-theme="dark"] .media-hover-empty,
+:root[data-theme="dark"] .external-hover-meta small,
+:root[data-theme="dark"] .external-hover-overview,
+:root[data-theme="dark"] .media-card-hover-meta small {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .data-table {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .data-table th,
+:root[data-theme="dark"] .data-table td {
+  border-bottom-color: var(--border);
+}
+
+:root[data-theme="dark"] .data-table th {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .list {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .list li {
+  border-bottom-color: var(--border);
+}
+
+:root[data-theme="dark"] .reviews li {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .reviews li,
+body[data-theme="dark"] .reviews li {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .review-author-avatar,
+:root[data-theme="dark"] .review-poster {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+html[data-theme="dark"] .review-author-avatar,
+html[data-theme="dark"] .review-poster,
+body[data-theme="dark"] .review-author-avatar,
+body[data-theme="dark"] .review-poster {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .review-rating {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+html[data-theme="dark"] .review-rating,
+body[data-theme="dark"] .review-rating {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .button-link.ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .button-link.ghost:hover {
+  background: #3a3129;
+}
+
+:root[data-theme="dark"] .profile-panel,
+:root[data-theme="dark"] .crop-modal-card,
+:root[data-theme="dark"] .skeleton-card,
+:root[data-theme="dark"] .skeleton-details {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .profile-image-preview {
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .profile-image-preview.placeholder {
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .profile-divider {
+  border-top-color: var(--border);
+}
+
+:root[data-theme="dark"] .status {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .status.error {
+  background: rgba(190, 67, 59, 0.22);
+  color: #ffb3ad;
+}
+
+:root[data-theme="dark"] .status.loading,
+:root[data-theme="dark"] .status.empty {
+  background: var(--surface-2);
+  color: var(--muted);
 }
 
 @keyframes page-rise {
