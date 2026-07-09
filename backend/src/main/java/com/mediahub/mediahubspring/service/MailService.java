@@ -20,7 +20,10 @@ public class MailService {
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username:}")
-    private String fromAddress;
+    private String smtpUsername;
+
+    @Value("${app.mail.from:}")
+    private String configuredFromAddress;
 
     @Value("${spring.mail.host:}")
     private String smtpHost;
@@ -42,8 +45,12 @@ public class MailService {
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            if (fromAddress != null && !fromAddress.isBlank()) {
-                message.setFrom(fromAddress);
+            String from = (configuredFromAddress != null && !configuredFromAddress.isBlank())
+                    ? configuredFromAddress
+                    : smtpUsername;
+
+            if (from != null && !from.isBlank()) {
+                message.setFrom(from);
             }
             message.setTo(to);
             message.setSubject("MediaHub password reset");
@@ -52,6 +59,7 @@ public class MailService {
                     + resetLink
                     + "\n\nIf you did not request this, you can ignore this email.");
             mailSender.send(message);
+            log.info("Password reset email accepted by SMTP provider. host={} from={} to={}", smtpHost, from, to);
             return true;
         } catch (MailException ex) {
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "Could not send reset email");

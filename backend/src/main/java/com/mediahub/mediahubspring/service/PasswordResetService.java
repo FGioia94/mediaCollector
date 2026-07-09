@@ -5,6 +5,8 @@ import com.mediahub.mediahubspring.model.User;
 import com.mediahub.mediahubspring.repository.PasswordResetTokenRepository;
 import com.mediahub.mediahubspring.repository.UserRepository;
 import com.mediahub.mediahubspring.util.EmailNormalizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class PasswordResetService {
+
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetService.class);
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
@@ -48,6 +52,7 @@ public class PasswordResetService {
 
         // Return success even when user does not exist to avoid account enumeration.
         if (user == null) {
+            log.info("Password reset requested for unknown email: {}", normalizedEmail);
             return null;
         }
 
@@ -62,6 +67,15 @@ public class PasswordResetService {
 
         String resetLink = buildResetLink(saved.getToken());
         boolean sent = mailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+
+        log.info(
+            "Password reset email dispatch for userId={} email={} result={} tokenId={}",
+            user.getId(),
+            user.getEmail(),
+            sent ? "accepted-by-mail-sender" : "smtp-not-configured",
+            saved.getId()
+        );
+
         return sent ? null : resetLink;
     }
 
