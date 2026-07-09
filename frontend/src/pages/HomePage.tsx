@@ -59,11 +59,11 @@ export function HomePage() {
           <ul className="home-kpis" aria-label="Catalog highlights">
             <li>
               <strong>{totalItems}</strong>
-              <span>Top reviewed picks</span>
+              <span>Items in this top-reviewed list</span>
             </li>
             <li>
               <strong>{withPoster}</strong>
-              <span>Curated visual cards</span>
+              <span>Items with poster artwork</span>
             </li>
             <li>
               <strong>{oldestYear ?? "-"}</strong>
