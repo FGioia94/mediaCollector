@@ -17,7 +17,7 @@ vi.mock("../api/movies", () => ({
   listMovies: vi.fn(),
 }));
 vi.mock("../auth/AuthContext", () => ({
-  useAuth: () => ({ isAuthenticated: true }),
+  useAuth: () => ({ isAuthenticated: true, canEditContent: true }),
 }));
 vi.mock("../components/ExternalHoverCardWrap", () => ({
   ExternalHoverCardWrap: ({ children }: { children: ReactNode }) => <>{children}</>,
