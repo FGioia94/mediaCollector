@@ -87,20 +87,22 @@ export function AdminUsersPage() {
                 </td>
                 <td data-label="Email">{user.email}</td>
                 <td data-label="Roles">
-                  {roles.map((role) => {
-                    const checked = user.roles.some((r) => r.id === role.id);
-                    return (
-                      <label key={role.id} className="inline">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={user.systemAdmin}
-                          onChange={() => toggleRole(user, role)}
-                        />
-                        {role.name}
-                      </label>
-                    );
-                  })}
+                  <div className="role-checkbox-grid">
+                    {roles.map((role) => {
+                      const checked = user.roles.some((r) => r.id === role.id);
+                      return (
+                        <label key={role.id} className="inline">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={user.systemAdmin}
+                            onChange={() => toggleRole(user, role)}
+                          />
+                          {role.name}
+                        </label>
+                      );
+                    })}
+                  </div>
                   {user.systemAdmin && <span className="status">System Admin</span>}
                 </td>
                 <td data-label="Actions" className="row-actions">

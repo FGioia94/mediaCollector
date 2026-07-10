@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { ChangeEvent } from "react";
 
 export interface SortOption {
@@ -21,6 +22,24 @@ interface ListControlsProps {
 }
 
 const PAGE_SIZE_OPTIONS = [6, 12, 18, 24];
+
+function getVisiblePageNumbers(page: number, totalPages: number): number[] {
+  const maxButtons = 5;
+  if (totalPages <= maxButtons) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const half = Math.floor(maxButtons / 2);
+  let start = Math.max(1, page - half);
+  let end = start + maxButtons - 1;
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = end - maxButtons + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
 
 export function ListControls({
   sortBy,
@@ -48,23 +67,10 @@ export function ListControls({
     onPageSizeChange(Number(event.target.value));
   };
 
-  const visiblePageNumbers = (() => {
-    const maxButtons = 5;
-    if (totalPages <= maxButtons) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
-    }
-
-    const half = Math.floor(maxButtons / 2);
-    let start = Math.max(1, page - half);
-    let end = start + maxButtons - 1;
-
-    if (end > totalPages) {
-      end = totalPages;
-      start = end - maxButtons + 1;
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
-  })();
+  const visiblePageNumbers = useMemo(
+    () => getVisiblePageNumbers(page, totalPages),
+    [page, totalPages],
+  );
 
   return (
     <>

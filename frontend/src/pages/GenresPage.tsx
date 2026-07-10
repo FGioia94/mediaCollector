@@ -98,23 +98,27 @@ export function GenresPage() {
             <li key={genre.id}>
               {editingId === genre.id ? (
                 <>
-                  <input
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleUpdate(genre.id)}
-                  >
-                    Save
-                  </button>
-                  <button type="button" onClick={() => setEditingId(null)}>
-                    Cancel
-                  </button>
+                  <div className="list-item-main">
+                    <input
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                    />
+                  </div>
+                  <span className="row-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate(genre.id)}
+                    >
+                      Save
+                    </button>
+                    <button type="button" onClick={() => setEditingId(null)}>
+                      Cancel
+                    </button>
+                  </span>
                 </>
               ) : (
                 <>
-                  <span>{genre.name}</span>
+                  <span className="list-item-main">{genre.name}</span>
                   {isAuthenticated && (
                     <span className="row-actions">
                       <button

@@ -53,6 +53,27 @@ Notes:
 - `app.admin-bootstrap.enabled=true` is enabled by default.
 - If bootstrap is enabled but admin email/password are missing, admin creation is skipped with a warning.
 
+Mail and password reset related:
+- `MEDIAHUB_FRONTEND_BASE_URL` (used to build reset links)
+- `MEDIAHUB_PASSWORD_RESET_EXPIRATION_MINUTES` (default: `30`)
+- `MEDIAHUB_SMTP_HOST`
+- `MEDIAHUB_SMTP_PORT` (default: `587`)
+- `MEDIAHUB_SMTP_USERNAME`
+- `MEDIAHUB_SMTP_PASSWORD`
+- `MEDIAHUB_SMTP_AUTH` (default: `true`)
+- `MEDIAHUB_SMTP_STARTTLS` (default: `true`)
+- `MEDIAHUB_SMTP_FROM` (recommended explicit sender address)
+
+Auth endpoint rate limiting:
+- `MEDIAHUB_RATE_LIMIT_AUTH_MAX_REQUESTS` (default: `10`)
+- `MEDIAHUB_RATE_LIMIT_AUTH_WINDOW_SECONDS` (default: `60`)
+
+Rate limit is applied to auth actions:
+- register
+- login
+- forgot password
+- reset password
+
 ## External APIs (TMDB + OMDB)
 
 This project uses two external providers:
@@ -131,6 +152,8 @@ Role assignment request included:
 ### Auth
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
 
 ### Users (admin area)
 - `POST /users/add`

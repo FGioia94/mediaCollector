@@ -14,9 +14,17 @@ Stack:
 Provide a fast and clear interface for:
 
 - user authentication
-- movie/TV catalog management
+- movie and TV catalog management
 - reviews and watchlist
 - external content discovery with import into the local catalog
+
+## Recent Frontend Updates
+
+- improved mobile responsiveness for navbar, filters, list toolbar, and pagination
+- form layout refactor for movie and TV show editors with shared responsive grid styles
+- admin and genre management UI polish for better small-screen usability
+- route-level lazy loading with Suspense fallback for smaller initial bundle
+- small shared utility extraction for numeric form input parsing
 
 ## Local Setup
 
@@ -71,16 +79,25 @@ npm run lint
 
 - src/api/: typed API client layer
 - src/auth/: authentication and role state
-- src/components/: reusable components
-- src/pages/: application pages
+- src/components/: reusable and shared UI components
+- src/pages/: route-level pages (lazy loaded)
 - src/utils/: UI and business helpers
 
-## Implementation Notes
+## Architecture Notes
 
 - the API layer centralizes JWT token handling and error mapping
 - protected routes use role-based guards
+- route components are lazy loaded in App.tsx to reduce initial JavaScript payload
+- list and filtering pages share common controls through ListControls
 - hover popups display trailers and metadata with robust fallbacks
-- the UI handles unexpected payloads without runtime crashes
+- UI flows handle unexpected payload shapes without runtime crashes
+
+## Mobile and UX Notes
+
+- filters collapse to a single-column layout on narrow viewports
+- pagination numbers stay usable on small screens via horizontal scroll
+- navbar switches to compact grid layout with touch-friendly tap targets
+- form pages use a responsive two-column grid that becomes one column on mobile
 
 ## Test
 

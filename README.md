@@ -129,3 +129,10 @@ Primary deployment files:
 ## Status
 
 Active development with production-oriented architecture, automated tests, and CI/CD deployment pipeline.
+
+## Recent Updates
+
+- frontend mobile usability improvements across navbar, filters, toolbar, and pagination
+- frontend route-level lazy loading to reduce initial payload and improve load time
+- frontend form and admin UI refactor for cleaner responsive behavior
+- backend auth endpoint basic rate limiting configuration (register, login, forgot, reset)
