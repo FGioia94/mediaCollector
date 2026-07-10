@@ -2,6 +2,8 @@
 
 Media Collector is a production-style full-stack platform for media discovery and catalog management.
 
+**[WATCH THE DEMO VIDEO](https://drive.google.com/file/d/1ZvHXdFYRnqdYeVnheJv1w6elw9pP120E/view?usp=sharing)**
+
 Core capabilities:
 
 - JWT authentication and role-based authorization
