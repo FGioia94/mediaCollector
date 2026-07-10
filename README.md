@@ -4,6 +4,8 @@ Media Collector is a production-style full-stack platform for media discovery an
 
 **[WATCH THE DEMO VIDEO](https://drive.google.com/file/d/1ZvHXdFYRnqdYeVnheJv1w6elw9pP120E/view?usp=sharing)**
 
+**URL:** https://mediahub.francescogioia.it/
+
 Core capabilities:
 
 - JWT authentication and role-based authorization
@@ -83,16 +85,6 @@ npm install
 npm run dev
 ```
 
-Default URLs:
-
-- Frontend: http://localhost:5173
-- Backend: http://localhost:8080
-- Health: http://localhost:8080/api/health
-
-Frontend API base URL:
-
-- Controlled by VITE_MEDIA_HUB_BACKEND
-- Defaults to /api when not set
 
 ## Common Commands
 
