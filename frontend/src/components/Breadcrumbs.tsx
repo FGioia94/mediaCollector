@@ -18,7 +18,6 @@ const STATIC_LABELS: Record<string, string> = {
   "/profile": "Profile",
   "/admin": "Admin",
   "/admin/users": "Users",
-  "/admin/roles": "Roles",
   "/login": "Login",
   "/forgot-password": "Forgot Password",
   "/reset-password": "Reset Password",

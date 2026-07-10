@@ -120,7 +120,7 @@ export function TrendingPage() {
 
   return (
     <section>
-      <h1>Trending (TMDB)</h1>
+      <h1>Trending</h1>
       {error && <ErrorMsg>{error}</ErrorMsg>}
       {actionMsg && <p className="status">{actionMsg}</p>}
       {items === null && !error && <SkeletonCardGrid count={8} />}

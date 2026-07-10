@@ -173,6 +173,12 @@ textarea {
     transform 160ms ease;
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  padding: 0;
+}
+
 :root[data-theme="dark"] input,
 :root[data-theme="dark"] select,
 :root[data-theme="dark"] textarea {
@@ -991,6 +997,18 @@ fieldset {
 
 .filters button {
   height: 40px;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.checkbox-row input[type="checkbox"] {
+  margin: 0;
 }
 
 .media-grid {

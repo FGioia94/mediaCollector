@@ -38,9 +38,6 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand-wrap">
-        <div className="navbar-brand-mark" aria-hidden="true">
-          MH
-        </div>
         <div className="navbar-brand">
           <NavLink to="/">MediaHub</NavLink>
         </div>
@@ -75,7 +72,7 @@ export function Navbar() {
           </li>
           {isAdmin && (
             <li>
-              <NavLink to="/genres">Genres</NavLink>
+              <NavLink to="/genres">Admin: Genres</NavLink>
             </li>
           )}
           <li>
@@ -100,9 +97,6 @@ export function Navbar() {
                   <li>
                     <NavLink to="/admin/users">Admin: Users</NavLink>
                   </li>
-                  <li>
-                    <NavLink to="/admin/roles">Admin: Roles</NavLink>
-                  </li>
                 </>
               )}
             </>
@@ -112,7 +106,9 @@ export function Navbar() {
         <div className="navbar-auth">
         {isAuthenticated ? (
           <>
-            <span className="navbar-email">{username}</span>
+            <NavLink className="navbar-email" to="/profile">
+              {username}
+            </NavLink>
             <button type="button" onClick={handleLogout}>
               Logout
             </button>

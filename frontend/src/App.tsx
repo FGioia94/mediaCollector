@@ -1,10 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./auth/AuthContext";
-import { Breadcrumbs } from "./components/Breadcrumbs";
 import { Navbar } from "./components/Navbar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { DiscoverPage } from "./pages/DiscoverPage";
 import { ExternalMediaDetailsPage } from "./pages/ExternalMediaDetailsPage";
@@ -33,7 +31,6 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <main className="app-main">
-          <Breadcrumbs />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/discover" element={<DiscoverPage />} />
@@ -109,14 +106,6 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminUsersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/roles"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminRolesPage />
                 </ProtectedRoute>
               }
             />
