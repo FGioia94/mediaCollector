@@ -53,7 +53,6 @@ Component-specific docs:
 Prerequisites:
 
 - Java 17+
-- Node.js 20+
 - PostgreSQL
 
 Required backend environment variables:
